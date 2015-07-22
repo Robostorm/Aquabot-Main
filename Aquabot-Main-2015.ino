@@ -8,8 +8,10 @@
 #include "states.h"
 
 #include "Dispenser.h"
+#include "Lcd.h"
 
 Dispenser disp = Dispenser();
+Lcd lcd = Lcd();
 
 void setup(){
   pinMode(IRPIN, OUTPUT);
@@ -41,5 +43,5 @@ int ledUpdate(unsigned long now){
 }
 
 int lcdUpdate(){
-  
+
 }

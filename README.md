@@ -3,14 +3,14 @@ Code for the main arduino(teensy) in the aquabot
 
 This teensy controls the bill acceptor, LCD, keypad, and LED strips. There will be a disable signal wire running down to the driving board. Driving of the Aquabot will be disabled when this signal is high, but this is not yet final.
 
-# Pinout:
+# Pinout
 <pre>
 Pin   Function    Pin Type
 ---------------------------
-0     I/O Header  INT0, PWM
-1     I/O Header  INT1, PWM
-2     I/O Header  INT2, Serial RX
-3     Display     INT3, Serial TX
+0     I/O Header  PWM
+1     I/O Header  PWM
+2     I/O Header  Serial RX
+3     Display     Serial TX
 4     N/C         I/O
 5     I/O Header  I/O
 6     Status LED  I/O
@@ -25,8 +25,8 @@ Pin   Function    Pin Type
 15    Out Driver  PWM
 16    Out Driver  PWM
 17    Out Driver  I/O
-18    N/C         I/O, INT6
-19    N/C         I/O, INT7
+18    N/C         I/O
+19    N/C         I/O
 20    N/C         I/O
 21    N/C         I/O
 22    Photo Int   I/O
@@ -35,14 +35,14 @@ Pin   Function    Pin Type
 25    Speaker     PWM
 26    Servo       PWM
 27    I/O Header  PWM
-38    N/C         A0
-39    N/C         A1
-40    N/C         A2
-41    N/C         A3
-42    N/C         A4
-43    N/C         A5
-44    N/C         A6
-45    N/C         A7
+38    N/C         Analog Input
+39    N/C         Analog Input
+40    N/C         Analog Input
+41    N/C         Analog Input
+42    N/C         Analog Input
+43    N/C         Analog Input
+44    N/C         Analog Input
+45    N/C         Analog Input
 </pre>
 
 Most of the pins on the I/O header are now routed to the keypad, LED strips, and cooler switch. One of the analog pins is now connected to the cooler thermistor.
