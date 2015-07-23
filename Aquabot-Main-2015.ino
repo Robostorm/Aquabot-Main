@@ -14,17 +14,21 @@ Dispenser disp = Dispenser();
 Lcd lcd = Lcd();
 
 void setup(){
-  pinMode(IRPIN, OUTPUT);
-  pinMode(PHOTOPIN, OUTPUT);
-  pinMode(BILLPIN, OUTPUT);
-  pinMode(SERVOPIN, OUTPUT);
-  pinMode(LEDPIN, OUTPUT);
+  Serial.begin(9800);
+  Serial1.begin(9800);
+  Serial.println("Setting up");
+  disp.init();
+  lcd.init();
+  Serial1.print("Hello");
+  Serial.println("Finnished setting up");
 }
 
 void loop(){
+  //Serial.println("Looping");
   unsigned long now = millis();
   ledUpdate(now);
   disp.update(now);
+  lcd.update(now);
 }
 
 int ledUpdate(unsigned long now){

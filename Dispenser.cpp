@@ -2,8 +2,23 @@
 
 #include "Dispenser.h"
 
+#include "states.h"
+#include "conf.h"
+#include "pins.h"
+
+void Dispenser::init(){
+  servo.attach(SERVOPIN);
+  pinMode(IRPIN, INPUT);
+  pinMode(PHOTOPIN, INPUT);
+  pinMode(BILLPIN, OUTPUT);
+  pinMode(SERVOPIN, OUTPUT);
+  pinMode(LEDPIN, OUTPUT);
+}
+
 int Dispenser::update(unsigned long now){
-  
+  sensorUpdate(now);
+  motorUpdate(now);
+
   switch(state){
   case DISPREADY:
     if(irState == LOW){
@@ -26,7 +41,7 @@ int Dispenser::update(unsigned long now){
       dispense(now);
     }
     break;
-        
+
   case DISPDONE:
     state = READY;
     break;
@@ -43,38 +58,60 @@ void Dispenser::setServoPos(int pos){
 }
 
 void Dispenser::dispense(unsigned long now){
-    
+
   static unsigned long servoMillis = 0UL;
-  
-  if(now - servoMillis >= 10UL){
-        
+
+  Serial.println(now-servoMillis);
+
+  if(now - servoMillis >= SERVODELAY){
+
     if(servoState == 0){
-      if(servoPos < 135){
-        servoPos++;
+      if(servoPos < SERVOMAX){
+        servoPos += SERVOSTEP;
       }else{
         servoState = 1;
       }
     }
-    
+
     if(servoState == 1){
-      if(servoWait < 40){
+      if(servoWait < SERVOSTOP/SERVODELAY){
         servoWait++;
       }else{
         servoState = 2;
       }
     }
-    
+
     if(servoState == 2){
-      if(servoPos > 45){
-        servoPos--;
+      if(servoPos > SERVOMIN){
+        servoPos -= SERVOSTEP;
       }else{
         servoState = 3;
       }
     }
-    
+
     if(servoState == 3){
       state = DONE;
     }
     servoMillis = now;
+  }
+}
+
+void Dispenser::sensorUpdate(unsigned long now){
+  static unsigned long sensorMillis = 0UL;
+
+  if(now - sensorMillis >= SENSEDELAY){
+    irState = digitalRead(IRPIN);
+    photoState = digitalRead(PHOTOPIN);
+    sensorMillis = now;
+  }
+}
+
+void Dispenser::motorUpdate(unsigned long now){
+  static unsigned long motorMillis = 0UL;
+
+  if(now - motorMillis >= MOTORDELAY){
+    analogWrite(BILLPIN, motorPower);
+    servo.write(servoPos);
+    motorMillis = now;
   }
 }

@@ -28,7 +28,11 @@ private:
 
   void dispense(unsigned long now);
 
+  void sensorUpdate(unsigned long now);
+  void motorUpdate(unsigned long now);
+
 public:
+  void init();
   int update(unsigned long now);
   void setMotorPower(int power);
   void setServoPos(int pos);

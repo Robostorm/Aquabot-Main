@@ -11,10 +11,11 @@ private:
 
   Screen curScreen;
   Screen rootScreen;
+  Screen loadScreen;
 
 public:
-  void update();
-  void setRoot(Screen screen);
+  void init();
+  void update(unsigned long now);
   void setScreen(Screen screen);
   Screen getScreen();
 
