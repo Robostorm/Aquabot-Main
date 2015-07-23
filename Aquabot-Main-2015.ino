@@ -40,8 +40,6 @@ int ledUpdate(unsigned long now){
     digitalWrite(LEDPIN, ledState);
     ledMillis = now;
   }
-}
 
-int lcdUpdate(){
-
+  return ledState;
 }

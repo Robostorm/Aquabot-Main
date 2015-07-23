@@ -1,7 +1,11 @@
 
-#include "Screen.hpp"
+/* File Lcd.h  */
+#ifndef LCD
+#define LCD
 
- class Lcd{
+#include "Screen.h"
+
+class Lcd{
 
 private:
 
@@ -14,4 +18,6 @@ public:
   void setScreen(Screen screen);
   Screen getScreen();
 
-}
+};
+
+#endif /* !LCD */

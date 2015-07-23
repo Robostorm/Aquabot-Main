@@ -1,4 +1,7 @@
 //-*-C++-*-
+/* File Dispenser.h  */
+#ifndef DISPENSER
+#define DISPENSER
 
 #include <Servo.h>
 
@@ -7,24 +10,24 @@
 #include "states.h"
 
 class Dispenser{
-  
+
 private:
-  
+
   int state = DISPREADY;
   int ledState = 0;
   int irState = 0;
   int photoState = 0;
-  
+
   Servo servo;
-  
+
   int motorPower = 0;
   int servoPos = 45;
-  
+
   int servoState = 0;
   int servoWait = 0;
-  
+
   void dispense(unsigned long now);
-  
+
 public:
   int update(unsigned long now);
   void setMotorPower(int power);
@@ -35,3 +38,5 @@ public:
   int getIrState();
   int getPhotoState();
 };
+
+#endif /* !DISPENSER */
