@@ -1,8 +1,12 @@
 //-*-C++-*-
 //https://github.com/Robostorm/Aquabot-Bill-Feed-Dispencer/tree/2015
+/* File Aquabot-Main-2015.ino  */
+#ifndef AQUABOT
+#define AQUABOT
 
 #include <Servo.h>
 
+#include "common.h"
 #include "pins.h"
 #include "conf.h"
 #include "states.h"
@@ -18,8 +22,7 @@ void setup(){
   Serial1.begin(9800);
   Serial.println("Setting up");
   disp.init();
-  lcd.init();
-  Serial1.print("Hello");
+  lcd.init(millis());
   Serial.println("Finnished setting up");
 }
 
@@ -47,3 +50,5 @@ int ledUpdate(unsigned long now){
 
   return ledState;
 }
+
+#endif /* !AQUABOT */

@@ -15,4 +15,9 @@
 #define SERVOMIN 45
 #define SERVOMAX 135
 
+// LCD
+#define LCDDELAY 500UL
+#define LOADSCR 0
+#define MAINSCR 1
+
 #endif /* !CONF */

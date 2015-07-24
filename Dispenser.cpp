@@ -2,9 +2,14 @@
 
 #include "Dispenser.h"
 
+#include "common.h"
 #include "states.h"
 #include "conf.h"
 #include "pins.h"
+
+extern int bottles = 10;
+extern int bottleSold = 0;
+extern int coolerTemp = 0;
 
 void Dispenser::init(){
   servo.attach(SERVOPIN);
@@ -44,6 +49,8 @@ int Dispenser::update(unsigned long now){
 
   case DISPDONE:
     state = READY;
+    bottles--;
+    bottleSold++;
     break;
   }
   return 1;

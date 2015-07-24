@@ -9,6 +9,10 @@
 #include "conf.h"
 #include "states.h"
 
+extern int bottles;
+extern int bottleSold;
+extern int coolerTemp;
+
 class Dispenser{
 
 private:

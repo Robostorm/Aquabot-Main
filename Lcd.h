@@ -10,14 +10,15 @@ class Lcd{
 private:
 
   Screen curScreen;
-  Screen rootScreen;
+
   Screen loadScreen;
+  DataScreen mainScreen;
 
 public:
-  void init();
+  void init(unsigned long now);
   void update(unsigned long now);
-  void setScreen(Screen screen);
-  Screen getScreen();
+  void setScreen(int i);
+  Screen getScreen(int i);
 
 };
 
