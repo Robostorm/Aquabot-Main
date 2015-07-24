@@ -32,19 +32,36 @@ void Screen::setLine3(char* chars){
 }
 
 void DataScreen::update(unsigned long now){
+  static int firstRun = 1;
+
   Serial1.print("?x00?y0");
   Serial1.print(title);
-  for(int i = 0; i < 3; i++){
-    if(*data[i] != oldData[i]){
+
+  char line[20];
+
+  if(firstRun == 1){
+    for(int i = 0; i < 3; i++){
+
+      sprintf(line, "%s: %i%c", keys[i], *data[i], units[i]);
+
       Serial1.print("?x00?y");
       Serial1.print(i+1);
-      Serial1.print(keys[i]);
-      Serial1.print("?x17?y");
+      Serial1.print(line);
+
+      oldData[i] = *data[i];
+    }
+    firstRun = 0;
+  }
+
+  for(int i = 0; i < 3; i++){
+    if(*data[i] != oldData[i]){
+
+      sprintf(line, "%s: %i%c", keys[i], *data[i], units[i]);
+
+      Serial1.print("?x00?y");
       Serial1.print(i+1);
-      Serial1.print("   ");
-      Serial1.print("?x17?y");
-      Serial1.print(i+1);
-      Serial1.print(*data[i]);
+      Serial1.print(line);
+
       oldData[i] = *data[i];
     }
   }
@@ -56,4 +73,8 @@ void DataScreen::setKey(int index, char* key){
 
 void DataScreen::setData(int index, int* dat){
   data[index] = dat;
+}
+
+void DataScreen::setUnit(int index, char unit){
+  units[index] = unit;
 }

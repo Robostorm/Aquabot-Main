@@ -10,7 +10,6 @@ protected:
   char* line2;
   char* line3;
   char* title;
-  void lcdUpdate();
 
 public:
   void update(unsigned long now);
@@ -25,12 +24,14 @@ class DataScreen: public Screen{
 protected:
   char* keys[3] = {"", "", ""};
   int* data[3] = {0, 0, 0};
+  char units[3] = {' ', ' ', ' '};
   int oldData[3] = {-1, -1, -1};
 
 public:
   void update(unsigned long now);
   void setKey(int index, char* key);
   void setData(int index, int* dat);
+  void setUnit(int index, char unit);
 };
 
 #endif /* !SCREEN */

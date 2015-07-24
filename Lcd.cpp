@@ -20,12 +20,13 @@ void Lcd::init(unsigned long now){
 
   mainScreen = DataScreen();
   mainScreen.setTitle("      Aquabot       ");
-  mainScreen.setKey(0, "Bottles Sold:");
+  mainScreen.setKey(0, "Bottles Sold");
   mainScreen.setData(0, &bottleSold);
-  mainScreen.setKey(1, "Bottles Left:");
+  mainScreen.setKey(1, "Bottles Left");
   mainScreen.setData(1, &bottles);
-  mainScreen.setKey(2, "Temperature:");
+  mainScreen.setKey(2, "Temperature");
   mainScreen.setData(2, &coolerTemp);
+  mainScreen.setUnit(2, 'F');
 
   curScreen = mainScreen;
 
