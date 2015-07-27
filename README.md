@@ -7,47 +7,53 @@ This teensy controls the bill acceptor, LCD, keypad, and LED strips. There will 
 <pre>
 Pin   Function    Pin Type
 ---------------------------
-0     I/O Header  PWM
-1     I/O Header  PWM
-2     I/O Header  Serial RX
-3     Display     Serial TX
-4     N/C         I/O
-5     I/O Header  I/O
+0     Red LED 1   I/O, PWM, INT0
+1     Blue LED 1  I/O, PWM, INT1
+2     N/C         I/O, RX , INT2
+3     Display     I/O, TX , INT3
+4     AUX Header  I/O
+5     Keypad      I/O
 6     Status LED  I/O
-7     I/O Header  I/O
-8     I/O Header  I/O
-9     I/O Header  I/O
-10    Out Driver  I/O
-11    Out Driver  I/O
-12    Out Driver  I/O
-13    Out Driver  I/O
-14    Out Driver  PWM
-15    Out Driver  PWM
-16    Out Driver  PWM
-17    Out Driver  I/O
-18    N/C         I/O
-19    N/C         I/O
+7     Keypad      I/O
+8     Keypad      I/O
+9     Keypad      I/O
+10    Keypad      I/O
+11    Keypad      I/O
+12    Keypad      I/O
+13    Keypad      I/O
+14    Green LED 2 I/O, PWM
+15    Red LED 2   I/O, PWM
+16    Blue LED 2  I/O, PWM
+17    Keypad      I/O
+18    Cooler SW   I/O, INT6
+19    N/C         I/O, INT7
 20    N/C         I/O
 21    N/C         I/O
 22    Photo Int   I/O
 23    IR Detector I/O
-24    Bill Motor  PWM
-25    Speaker     PWM
-26    Servo       PWM
-27    I/O Header  PWM
-38    N/C         Analog Input
-39    N/C         Analog Input
-40    N/C         Analog Input
-41    N/C         Analog Input
-42    N/C         Analog Input
-43    N/C         Analog Input
-44    N/C         Analog Input
-45    N/C         Analog Input
+24    Bill Motor  I/O, PWM
+25    Speaker     I/O, PWM
+26    Servo       I/O, PWM
+27    Green LED 1 I/O, PWM
+28    RX Rudder   I/O
+29    RX Aux 1    I/O
+30    RX Aux 2    I/O
+31    Drvng Enbl  I/O
+32    RX Elev     I/O
+33    RX Alie     I/O
+34    RX Thro     I/O
+35    Drvng Dsbl  I/O
+36    N/C         I/O, INT4
+37    N/C         I/O, INT5
+38    Cooler Temp I/O, A0
+39    N/C         I/O, A1
+40    N/C         I/O, A2
+41    N/C         I/O, A3
+42    N/C         I/O, A4
+43    N/C         I/O, A5
+44    N/C         I/O, A6
+45    N/C         I/O, A7
 </pre>
-
-Most of the pins on the I/O header are now routed to the keypad, LED strips, and cooler switch. One of the analog pins is now connected to the cooler thermistor.
-
-The out driver pins go to the I/O header though a DIP socket for one of the output drivers on the original bill acceptor control board. This will be replaced with jumpers to connect the Teensey pin directly.
 
 # Bill Acceptor
 The squence for accepting bills is like this:
