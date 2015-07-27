@@ -9,42 +9,41 @@
 #include "conf.h"
 #include "states.h"
 
-extern int bottles;
-extern int bottleSold;
-extern int coolerTemp;
-
 class Dispenser{
 
 private:
+  static int state;
+  static int ledState;
+  static int irState;
+  static int photoState;
 
-  int state = DISPREADY;
-  int ledState = 0;
-  int irState = 0;
-  int photoState = 0;
+  static PWMServo servo;
 
-  PWMServo servo;
+  static int motorPower;
+  static int servoPos;
 
-  int motorPower = 0;
-  int servoPos = 45;
+  static int servoState;
+  static int servoWait;
 
-  int servoState = 0;
-  int servoWait = 0;
+  static void dispense(unsigned long now);
 
-  void dispense(unsigned long now);
-
-  void sensorUpdate(unsigned long now);
-  void motorUpdate(unsigned long now);
+  static void sensorUpdate(unsigned long now);
+  static void motorUpdate(unsigned long now);
 
 public:
-  void init();
-  int update(unsigned long now);
-  void setMotorPower(int power);
-  void setServoPos(int pos);
-  int getServoPos();
-  int getMotorPower();
-  int getLedState();
-  int getIrState();
-  int getPhotoState();
+  static int bottles;
+  static int bottleSold;
+  static int coolerTemp;
+
+  static void init();
+  static int update(unsigned long now);
+  static void setMotorPower(int power);
+  static void setServoPos(int pos);
+  static int getServoPos();
+  static int getMotorPower();
+  static int getLedState();
+  static int getIrState();
+  static int getPhotoState();
 };
 
 #endif /* !DISPENSER */

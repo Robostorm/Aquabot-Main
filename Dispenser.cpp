@@ -7,11 +7,24 @@
 #include "conf.h"
 #include "pins.h"
 
-extern int bottles = 10;
-extern int bottleSold = 0;
-extern int coolerTemp = 0;
+int Dispenser::bottles = 10;
+int Dispenser::bottleSold = 0;
+int Dispenser::coolerTemp = 0;
+
+int Dispenser::state = DISPREADY;
+int Dispenser::ledState = 0;
+int Dispenser::irState = 0;
+int Dispenser::photoState = 0;
+
+PWMServo Dispenser::servo = PWMServo();
+
+int Dispenser::motorPower = 0;
+int Dispenser::servoPos = 45;
+int Dispenser::servoState = 0;
+int Dispenser::servoWait = 0;
 
 void Dispenser::init(){
+
   servo.attach(SERVOPIN);
   pinMode(IRPIN, INPUT);
   pinMode(PHOTOPIN, INPUT);

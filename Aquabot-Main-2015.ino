@@ -16,14 +16,13 @@
 #include "Dispenser.h"
 #include "Lcd.h"
 
-Dispenser disp = Dispenser();
 Lcd lcd = Lcd();
 
 void setup(){
   Serial.begin(9800);
   Serial1.begin(9800);
   Serial.println("Setting up");
-  disp.init();
+  Dispenser::init();
   lcd.init(millis());
   pinMode(RED1, OUTPUT);
   pinMode(GREEN1, OUTPUT);
@@ -45,7 +44,7 @@ void loop(){
   //Serial.println("Looping");
   unsigned long now = millis();
   ledUpdate(now);
-  disp.update(now);
+  Dispenser::update(now);
   lcd.update(now);
 }
 
