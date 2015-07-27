@@ -8,6 +8,10 @@
 #include "pins.h"
 #include "states.h"
 
+Screen Lcd::curScreen = Screen();
+Screen Lcd::loadScreen = Screen();
+DataScreen Lcd::mainScreen = DataScreen();
+
 void Lcd::init(unsigned long now){
   Serial.println("Initting Lcd");
   Serial1.print("?f");
