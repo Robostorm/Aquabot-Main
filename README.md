@@ -34,7 +34,7 @@ Pin   Function    Pin Type
 24    Bill Motor  I/O, PWM
 25    Speaker     I/O, PWM
 26    Servo       I/O, PWM
-27    Green LED 1 I/O, PWM
+27    Green LED 1 I/O, PWM (Note: PWM on this pin does not work due to interference with the servo library)
 28    RX Rudder   I/O
 29    RX Aux 1    I/O
 30    RX Aux 2    I/O

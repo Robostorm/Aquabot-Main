@@ -14,4 +14,12 @@
 #define SERVOPIN 26
 #define LEDPIN 6
 
+#define RED1 0
+#define GREEN1 27
+#define BLUE1 1
+
+#define RED2 15
+#define GREEN2 14
+#define BLUE2 16
+
 #endif /* !PINS */

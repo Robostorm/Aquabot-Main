@@ -3,7 +3,7 @@
 #ifndef DISPENSER
 #define DISPENSER
 
-#include <Servo.h>
+#include <PWMServo.h>
 
 #include "pins.h"
 #include "conf.h"
@@ -22,7 +22,7 @@ private:
   int irState = 0;
   int photoState = 0;
 
-  Servo servo;
+  PWMServo servo;
 
   int motorPower = 0;
   int servoPos = 45;

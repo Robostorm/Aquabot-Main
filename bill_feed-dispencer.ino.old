@@ -33,17 +33,17 @@ char* actionText;
 void setup(){
   Serial.begin(9600);
   Serial.println("Running Setup");
-  
+
   servo.attach(SERVOPIN);
-  
+
   //Inputs
   pinMode(IRPIN, INPUT);
   pinMode(PHOTOPIN, INPUT);
-  
+
   //Outputs
   pinMode(BILLPIN, OUTPUT);
   pinMode(LEDPIN, OUTPUT);
-  
+
 }
 
 void loop(){
@@ -78,7 +78,7 @@ void loop(){
         dispense(now);
       }
       return;
-        
+
     case DONE:
       Serial.println("Thank you and have a nice day.");
       //toneAC(300);
@@ -89,7 +89,7 @@ void loop(){
 
 void sensorUpdate(unsigned long now){
   static unsigned long sensorMillis = 0UL;
-  
+
   if(now - sensorMillis >= 10UL){
     irState = digitalRead(IRPIN);
     photoState = digitalRead(PHOTOPIN);
@@ -99,7 +99,7 @@ void sensorUpdate(unsigned long now){
 
 void motorUpdate(unsigned long now){
   static unsigned long motorMillis = 0UL;
-  
+
   if(now - motorMillis >= 10UL){
     analogWrite(BILLPIN, billPower);
     servo.write(servoPos);
@@ -109,7 +109,7 @@ void motorUpdate(unsigned long now){
 
 void ledUpdate(unsigned long now){
   static unsigned long ledMillis = 0UL;
-  
+
   if(now - ledMillis >= 1000UL){
     if(ledState == HIGH){
       ledState = LOW;
@@ -123,7 +123,7 @@ void ledUpdate(unsigned long now){
 
 void printUpdate(unsigned long now){
   static unsigned long printMillis = 0UL;
-  
+
   if(now - printMillis >= 10UL){
     Serial.print("State: ");
     Serial.print(state);
@@ -147,13 +147,13 @@ void printUpdate(unsigned long now){
 void dispense(unsigned long now){
   //for (servoPos = 5; servoPos < 85; servoPos++){}
   //for (servoPos = 85; servoPos > 5; servoPos--){}
-  
+
   static unsigned long servoMillis = 0UL;
-  
+
   if(now - servoMillis >= 10UL){
-    
+
     sprintf(actionText, "Dispensing: ""%d", servoState);
-    
+
     if(servoState == 0){
       if(servoPos < 135){
         servoPos++;
@@ -161,7 +161,7 @@ void dispense(unsigned long now){
         servoState = 1;
       }
     }
-    
+
     if(servoState == 1){
       if(servoWait < 40){
         servoWait++;
@@ -169,7 +169,7 @@ void dispense(unsigned long now){
         servoState = 2;
       }
     }
-    
+
     if(servoState == 2){
       if(servoPos > 45){
         servoPos--;
@@ -177,11 +177,11 @@ void dispense(unsigned long now){
         servoState = 3;
       }
     }
-    
+
     if(servoState == 3){
       state = DONE;
     }
     servoMillis = now;
   }
-  
+
 }
