@@ -58,3 +58,7 @@ Pin   Function    Pin Type
 # Bill Acceptor
 The squence for accepting bills is like this:
 First, the IR sensor must detect the bill. Then, the bill motor must be accepted to pull the bill in. At this point, the 'head sensor' magnetic sensor will start reading the magnetic threads in the bill. This is currently not used, but if anyone whants to implement it, they can. Now, the photo interupter will detect the lever at the end of the run of the bill exit being pressed. This lever will be released once the bill exits. This will now have to shut off the bill motor. This can also be used time the run of the bill through the bill acceptor to do some basic error checking.
+
+#Libraries Used
+
+- PWMServo https://www.pjrc.com/teensy/td_libs_Servo.html
