@@ -20,4 +20,9 @@
 #define LOADSCR 0
 #define MAINSCR 1
 
+// LED Strips
+#define LEDSDELAY 10UL
+#define LEDPATTERNS 3
+#define BLNKDELAY 150UL
+
 #endif /* !CONF */

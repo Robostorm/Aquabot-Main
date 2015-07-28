@@ -8,35 +8,35 @@
 
 #include <PWMServo.h>
 
-#include "common.h"
 #include "pins.h"
 #include "conf.h"
 #include "states.h"
 
 #include "Dispenser.h"
 #include "Lcd.h"
+#include "LedStrip.h"
+#include "LedPattern.h"
 
-Lcd lcd = Lcd();
+LedStrip topLeds = LedStrip(RED2, GREEN2, BLUE2, "Top Leds");
+LedStrip frontLeds = LedStrip(RED1, GREEN1, BLUE1, "Front Leds");
 
 void setup(){
   Serial.begin(9800);
   Serial1.begin(9800);
   Serial.println("Setting up");
   Dispenser::init();
-  lcd.init(millis());
-  pinMode(RED1, OUTPUT);
-  pinMode(GREEN1, OUTPUT);
-  pinMode(BLUE1, OUTPUT);
-  pinMode(RED2, OUTPUT);
-  pinMode(GREEN2, OUTPUT);
-  pinMode(BLUE2, OUTPUT);
+  Lcd::init(millis());
 
-  analogWrite(RED1, 128);
-  digitalWrite(GREEN1, HIGH);
-  analogWrite(BLUE1, 128);
-  analogWrite(RED2, 255);
-  analogWrite(GREEN2, 255);
-  analogWrite(BLUE2, 255);
+  topLeds.init();
+  topLeds.setPattern(new BillFlash(), 2);
+  topLeds.setPattern(new Blue(), 1);
+  topLeds.setPattern(new Blue(), 0);
+
+  frontLeds.init();
+  frontLeds.setPattern(new BillBlue(), 2);
+  frontLeds.setPattern(new DispGreen(), 1);
+  frontLeds.setPattern(new FadeBG(), 0);
+
   Serial.println("Finnished setting up");
 }
 
@@ -45,7 +45,10 @@ void loop(){
   unsigned long now = millis();
   ledUpdate(now);
   Dispenser::update(now);
-  lcd.update(now);
+  Lcd::update(now);
+
+  topLeds.update(now);
+  frontLeds.update(now);
 }
 
 int ledUpdate(unsigned long now){

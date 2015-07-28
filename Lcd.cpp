@@ -3,7 +3,7 @@
 #include "Lcd.h"
 #include "Screen.h"
 #include "Dispenser.h"
-#include "common.h"
+
 #include "conf.h"
 #include "pins.h"
 #include "states.h"

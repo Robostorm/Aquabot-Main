@@ -37,8 +37,7 @@ public:
 
   static void init();
   static int update(unsigned long now);
-  static void setMotorPower(int power);
-  static void setServoPos(int pos);
+  static int getState();
   static int getServoPos();
   static int getMotorPower();
   static int getLedState();

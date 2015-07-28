@@ -2,7 +2,7 @@
 
 #include "Dispenser.h"
 
-#include "common.h"
+
 #include "states.h"
 #include "conf.h"
 #include "pins.h"
@@ -69,19 +69,11 @@ int Dispenser::update(unsigned long now){
   return 1;
 }
 
-void Dispenser::setMotorPower(int power){
-  motorPower = power;
-}
-
-void Dispenser::setServoPos(int pos){
-  servoPos = pos;
-}
-
 void Dispenser::dispense(unsigned long now){
 
   static unsigned long servoMillis = 0UL;
 
-  Serial.println(now-servoMillis);
+  //Serial.println(now-servoMillis);
 
   if(now - servoMillis >= SERVODELAY){
 
@@ -134,4 +126,8 @@ void Dispenser::motorUpdate(unsigned long now){
     servo.write(servoPos);
     motorMillis = now;
   }
+}
+
+int Dispenser::getState(){
+  return state;
 }
