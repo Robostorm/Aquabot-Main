@@ -1,3 +1,5 @@
+#include <Keypad.h>
+
 #include <PWMServo.h>
 
 //-*-C++-*-

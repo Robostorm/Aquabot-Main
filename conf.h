@@ -16,9 +16,17 @@
 #define SERVOMAX 135
 
 // LCD
-#define LCDDELAY 500UL
+#define LCDDELAY 100UL
 #define LOADSCR 0
 #define MAINSCR 1
+#define PASSWORD "#369"
+#define SELECT '>'
+
+// Keypad
+#define KEYDELAY 0UL
+#define KEYROW 5
+#define KEYCOL 4
+#define NOKEY ' '
 
 // LED Strips
 #define LEDSDELAY 10UL

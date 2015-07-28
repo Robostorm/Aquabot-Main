@@ -1,3 +1,4 @@
+
 #include <Arduino.h>
 
 #include "LedStrip.h"
@@ -128,11 +129,11 @@ void FadeBG::update(int &red, int &blue, int &green){
   blue = old;
   green = 255 - old;
 
-  Serial.print(state);
-  Serial.print(":");
-  Serial.print(blue);
-  Serial.print(":");
-  Serial.println(green);
+  //Serial.print(state);
+  //Serial.print(":");
+  //Serial.print(blue);
+  //Serial.print(":");
+  //Serial.println(green);
 
 }
 
