@@ -13,10 +13,8 @@ class Lcd{
 
 private:
 
-  static Screen curScreen;
-  static Screen loadScreen;
-  static DataScreen mainScreen;
-  static MenuScreen menuScreen;
+  static int curScreen;
+  static Screen* screens[SCREENS];
 
   static char keys[KEYROW][KEYCOL];
   static byte rowPins[KEYROW]; //connect to the row pinouts of the keypad

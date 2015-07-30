@@ -10,10 +10,8 @@
 #include "pins.h"
 #include "states.h"
 
-Screen Lcd::curScreen = Screen();
-Screen Lcd::loadScreen = Screen();
-DataScreen Lcd::mainScreen = DataScreen();
-MenuScreen Lcd::menuScreen = MenuScreen();
+int Lcd::curScreen;
+Screen* Lcd::screens[SCREENS];
 
 char Lcd::keys[KEYROW][KEYCOL] = {
   {'L','0','R','E'},
@@ -32,31 +30,17 @@ char Lcd::key = NOKEY;
 void Lcd::init(unsigned long now){
   Serial.println("Initting Lcd");
   Serial1.print("?f");
-  loadScreen = Screen();
-  loadScreen.setTitle("                    ");
-  loadScreen.setLine1("      Aquabot       ");
-  loadScreen.setLine2("      Loading...    ");
-  loadScreen.setLine3("====================");
-  loadScreen.update(now);
 
-  menuScreen = MenuScreen();
-  menuScreen.setScreen1("Hello", Screen());
-  menuScreen.setScreen1("ssss", Screen());
-  menuScreen.setScreen1("Hedddllo", Screen());
+  DataScreen* mainScreen = new DataScreen(
+    "      Aquabot",
+    "Bottles Sold", &Dispenser::bottleSold, ' ',
+    "Bottles Left", &Dispenser::bottles, ' ',
+    "Temperature",&Dispenser::coolerTemp, 'F'
+  );
 
-  mainScreen = DataScreen();
-  mainScreen.setTitle("      Aquabot");
-  mainScreen.setKey(0, "Bottles Sold");
-  mainScreen.setData(0, &Dispenser::bottleSold);
-  mainScreen.setKey(1, "Bottles Left");
-  mainScreen.setData(1, &Dispenser::bottles);
-  mainScreen.setKey(2, "Temperature");
-  mainScreen.setData(2, &Dispenser::coolerTemp);
-  mainScreen.setUnit(2, 'F');
-  mainScreen.setMainScreen(menuScreen);
+  screens[MAINSCR] = new Screen("Hello");
 
-
-  curScreen = mainScreen;
+  curScreen = MAINSCR;
 
   Serial1.print("?f");
 }
@@ -73,7 +57,19 @@ void Lcd::update(unsigned long now){
       key = nkey;
     }
 
-    mainScreen.update(now);
+    Serial.println(curScreen);
+    //Screen d = Screen("Aquabot");
+    //d.update(now);
+
+    Serial.println("Updating");
+    Serial1.print("?x00?y0");
+    Serial1.print("title");
+    Serial1.print("?x00?y1");
+    Serial1.print({"lines[0]"});
+    Serial1.print("?x00?y2");
+    Serial1.print("lines[1]");
+    Serial1.print("?x00?y3");
+    Serial1.print("lines[2]");
 
     Serial1.print("?x19?y0");
     Serial1.print(key);
@@ -85,5 +81,5 @@ void Lcd::update(unsigned long now){
 }
 
 Screen Lcd::getScreen(int i){
-  return curScreen;
+  return *screens[curScreen];
 }

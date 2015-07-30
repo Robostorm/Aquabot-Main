@@ -4,6 +4,46 @@
 #define SCREEN
 
 class Screen{
+protected:
+    char* title; // Displayed at the top
+    char* lines[3]; // one for each line
+    int screen = 0;
+public:
+    Screen(char* t);
+    virtual void init(unsigned long now);
+    virtual void update(unsigned long now);
+    char* getTitle(){return title;}
+};
+
+class DataScreen: public Screen{
+protected:
+  char* keys[3] = {"", "", ""};
+  int* data[3] = {0, 0, 0};
+  char units[3] = {' ', ' ', ' '};
+  char* password = "    ";
+  int passi = 0;
+
+public:
+  DataScreen(char* t, char* k1, int* d1, char u1, char* k2, int* d2, char u2, char* k3, int* d3, char u3);
+  void init(unsigned long now);
+  void update(unsigned long now);
+};
+
+class MenuScreen: public Screen{
+protected:
+    Screen* screens;
+    int size = 0;
+    int screenPos = 0;
+    int cursorPos = 0;
+    int curscnPos = 0;
+public:
+    MenuScreen(char* t, Screen* s, int n); // s=screens, n=number of screens
+    void init(unsigned long now);
+    void update(unsigned long now);
+};
+
+/*
+class Screen{
 
 protected:
   char* line1;
@@ -56,5 +96,5 @@ public:
   void setScreen2(char* l, Screen s){lines[1] = l, screens[1] = s;};
   void setScreen3(char* l, Screen s){lines[2] = l, screens[2] = s;};
 };
-
+*/
 #endif /* !SCREEN */

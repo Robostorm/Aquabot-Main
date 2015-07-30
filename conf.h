@@ -17,8 +17,9 @@
 
 // LCD
 #define LCDDELAY 100UL
-#define LOADSCR 0
-#define MAINSCR 1
+#define SCREENS 2
+#define MAINSCR 0
+#define MENUSCR 1
 #define PASSWORD "#369"
 #define SELECT '>'
 
