@@ -44,6 +44,10 @@ int servoPos = SERVOMIN;
 char* password = "   ";
 int passi = 0;
 
+int btd = 0; // Bottles to dispense
+
+int ledBrightness = 100;
+
 boolean lcdUnlock = false;
 
 char keys[KEYROW][KEYCOL] = {
@@ -61,8 +65,7 @@ Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, KEYROW, KEYCOL);
 char key = NOKEY;
 
 void setup(){
-  Serial.begin(9600);\
-  delay(3000);
+  Serial.begin(9600);
   Serial1.begin(9600);
   Serial.println("Setting up");
 
@@ -73,9 +76,10 @@ void setup(){
   pinMode(BILLPIN, OUTPUT);
   pinMode(SERVOPIN, OUTPUT);
   pinMode(LEDPIN, OUTPUT);
-  delay(1000);
+
+  delay(5000);
   Serial1.print("?f");
-  delay(1000);
+  Serial1.print("?c0");
 
   Serial.println("Finnished setting up");
 }
@@ -86,10 +90,11 @@ void loop(){
   sensorUpdate(now);
   motorUpdate(now);
   ledUpdate(now);
+  moneyUpdate(now);
   dispenserUpdate(now);
   ledStripUpdate(now);
   lcdUpdate(now);
-  Serial.println(now-oldNow);
+  //Serial.println(now-oldNow);
   oldNow = now;
 }
 
@@ -259,7 +264,6 @@ void ledStripUpdate(unsigned long now){
       }
 
     }
-
     oldRed1 = red1;
     oldGreen1 = green1;
     oldBlue1 = blue1;
@@ -284,6 +288,14 @@ void ledStripUpdate(unsigned long now){
     Serial.print(rainbowState);
     Serial.println();
     #endif
+
+    red1 *= ledBrightness/100.0;
+    green1 *= ledBrightness/100.0;
+    blue1 *= ledBrightness/100.0;
+
+    red2 *= ledBrightness/100.0;
+    green2 *= ledBrightness/100.0;
+    blue2 *= ledBrightness/100.0;
 
     if(RED1 != 27)
       analogWrite(RED1, red1);
@@ -322,16 +334,16 @@ void ledStripUpdate(unsigned long now){
   }
 }
 
-void dispenserUpdate(unsigned long now){
+void moneyUpdate(unsigned long now){
 
   switch(dispState){
   case DISPREADY:
-    if(irState == LOW){
-      if(bottles < 0)
+    if(irState == LOW && bottles > 0){
+      //if(bottles == 0)
         dispState = GETTING;
     }
-    servoState = 0;
-    servoWait = 0;
+    //servoState = 0;
+    //servoWait = 0;
     break;
   case DISPGETTING:
     motorPower = 255;
@@ -344,7 +356,12 @@ void dispenserUpdate(unsigned long now){
       break;
     }else{
       motorPower = 0;
-      dispense(now);
+      btd++;
+      dispState = DISPDONE;
+      //int done = dispense(now);
+      //if(done == 1){
+      //  dispState = DISPDONE;
+      //}
     }
     break;
 
@@ -356,12 +373,42 @@ void dispenserUpdate(unsigned long now){
   }
 }
 
+void dispenserUpdate(unsigned long now){
+  static boolean dispensing  = false;
+
+  //Serial.print(btd);
+  //Serial.print(":");
+  //Serial.println(dispensing);
+
+
+  if(dispensing){
+    int tmp = dispense(now);
+    if(tmp == 1){
+      //Serial.print(":");
+      //Serial.println("Done");
+      dispensing = false;
+      btd--;
+    }
+  }else{
+    if(btd > 0){
+      //Serial.print(":");
+      //Serial.println("Bottles");
+      dispensing = true;
+      servoState = 0;
+      servoWait = 0;
+    }
+  }
+
+  //Serial.println();
+}
+
 void sensorUpdate(unsigned long now){
   static unsigned long sensorMillis = 0UL;
 
   if(now - sensorMillis >= SENSEDELAY){
     irState = digitalRead(IRPIN);
     photoState = digitalRead(PHOTOPIN);
+    coolerTemp = ((double) analogRead(COOLTEMP))*(500.0/1023.0);
     sensorMillis = now;
   }
 }
@@ -376,13 +423,24 @@ void motorUpdate(unsigned long now){
   }
 }
 
-void dispense(unsigned long now){
+int dispense(unsigned long now){
 
   static unsigned long servoMillis = 0UL;
 
   //Serial.println(now-servoMillis);
 
+
   if(now - servoMillis >= SERVODELAY){
+
+    //Serial.print(servoState);
+    //Serial.print(":");
+    //Serial.print(servoPos);
+    //Serial.print(":");
+    //Serial.print(servoWait);
+    //Serial.print(":");
+    //Serial.print(now - servoMillis);
+    //Serial.print(":");
+    //Serial.println(now);
 
     if(servoState == 0){
       if(servoPos < SERVOMAX){
@@ -396,6 +454,7 @@ void dispense(unsigned long now){
       if(servoWait < SERVOSTOP/SERVODELAY){
         servoWait++;
       }else{
+        servoWait = 0;
         servoState = 2;
       }
     }
@@ -409,19 +468,39 @@ void dispense(unsigned long now){
     }
 
     if(servoState == 3){
-      dispState = DONE;
+      if(servoWait < SERVOSTOP/SERVODELAY){
+        servoWait++;
+      }else{
+        servoState = 0;
+        return 1;
+      }
     }
+
     servoMillis = now;
+    return 0;
   }
 }
 
 void lcdUpdate(unsigned long now){
+  static unsigned long drawMillis = 0UL;
   static unsigned long lcdMillis = 0UL;
   static boolean firstDraw = true;
 
   static int oldBottles = bottles;
   static int oldBottleSold = bottleSold;
   static int oldCoolerTemp = coolerTemp;
+
+  static int curPos = 1;
+
+  static int screen = MAINMENU;
+
+  boolean redraw = false;
+
+  if(now - drawMillis >= DRAWDELAY){
+    redraw = true;
+    //Serial.println("Redrawing");
+    drawMillis = now;
+  }
 
   if(now - lcdMillis >= LCDDELAY){
     //Serial.println(now - lcdMillis);
@@ -431,13 +510,175 @@ void lcdUpdate(unsigned long now){
       key = nkey;
     }
 
-    if(lcdUnlock){
+    //Serial.print(screen);
+    //Serial.print(":");
+    //Serial.print(firstDraw);
+    //Serial.println();
 
+    if(lcdUnlock){
+      switch(screen){
+        case 0: // Main Menu
+          if(firstDraw){
+
+            Serial1.print("?f");
+
+            Serial1.print("?x00?y0");
+            Serial1.print("     Main Menu");
+
+            Serial1.print("?x01?y1");
+            Serial1.print("Set Bottles");
+
+            Serial1.print("?x01?y2");
+            Serial1.print("Dispense Bottle");
+
+            Serial1.print("?x01?y3");
+            Serial1.print("Set LEDs Brightness");
+
+            switch(curPos){
+              case 1:
+                Serial1.print("?x00?y1");
+                Serial1.print(">");
+                Serial1.print("?x00?y2");
+                Serial1.print(' ');
+                Serial1.print("?x00?y3");
+                Serial1.print(' ');
+                break;
+              case 2:
+                Serial1.print("?x00?y1");
+                Serial1.print(' ');
+                Serial1.print("?x00?y2");
+                Serial1.print(">");
+                Serial1.print("?x00?y3");
+                Serial1.print(' ');
+                break;
+              case 3:
+                Serial1.print("?x00?y1");
+                Serial1.print(' ');
+                Serial1.print("?x00?y2");
+                Serial1.print(' ');
+                Serial1.print("?x00?y3");
+                Serial1.print(">");
+                break;
+            }
+
+            firstDraw = false;
+          }
+
+          Serial1.print("?x19?y0");
+          Serial1.print(key);
+          Serial1.print("?x18?y0");
+          Serial1.print(curPos);
+
+
+          switch(key){
+            case NOKEY:
+              break;
+            case 'U':
+              if(curPos > 1){
+                curPos--;
+              }else{
+                curPos = 3;
+              }
+              redraw = true;
+              break;
+            case 'D':
+              if(curPos < 3){
+                curPos++;
+              }else{
+                curPos = 1;
+              }
+              redraw = true;
+              break;
+            case '^':
+              firstDraw = true;
+              lcdUnlock = false;
+              break;
+            case 'E':
+              screen = curPos;
+              break;
+          }
+
+          if(redraw){
+
+            switch(curPos){
+              case 1:
+                Serial1.print("?x00?y1");
+                Serial1.print(">");
+                Serial1.print("?x00?y2");
+                Serial1.print(' ');
+                Serial1.print("?x00?y3");
+                Serial1.print(' ');
+                break;
+              case 2:
+                Serial1.print("?x00?y1");
+                Serial1.print(' ');
+                Serial1.print("?x00?y2");
+                Serial1.print(">");
+                Serial1.print("?x00?y3");
+                Serial1.print(' ');
+                break;
+              case 3:
+                Serial1.print("?x00?y1");
+                Serial1.print(' ');
+                Serial1.print("?x00?y2");
+                Serial1.print(' ');
+                Serial1.print("?x00?y3");
+                Serial1.print(">");
+                break;
+            }
+          }
+
+          break;
+        case 1:{ // Set Bottles
+          int tmp = getInt(" Bottles In Cooler", 0, 11);
+          switch(tmp){
+            case -1:
+              break;
+            case -2:
+              screen = MAINMENU;
+              curPos = 1;
+              firstDraw = true;
+              break;
+            default:
+              bottles = tmp;
+              screen = MAINMENU;
+              firstDraw = true;
+              break;
+          }
+          break;
+        }
+        case 2:
+          btd++;
+          screen = MAINMENU;
+          break;
+
+        case 3:{ // Set Brightness
+          int tmp = getInt(" Brightness of LEDs", 0, 100);
+          switch(tmp){
+            case -1:
+              break;
+            case -2:
+              screen = MAINMENU;
+              curPos = 3;
+              firstDraw = true;
+              break;
+            default:
+              ledBrightness = tmp;
+              screen = MAINMENU;
+              firstDraw = true;
+              break;
+          }
+          break;
+        }
+      }
     }else{
 
-      char line[20];
+      char line[21];
+      //Serial.println(redraw);
+      if(firstDraw == 1 || redraw){
 
-      if(firstDraw == 1){
+        Serial1.print("?f");
+
         Serial1.print("?x00?y0");
         Serial1.print("      Aquabot");
 
@@ -449,7 +690,7 @@ void lcdUpdate(unsigned long now){
         Serial1.print("?x00?y2");
         Serial1.print(line);
 
-        sprintf(line, "%s: %i%c", "Temperature", coolerTemp, 'F');
+        sprintf(line, "%s: %i%s", "Temperature", coolerTemp, "F    ");
         Serial1.print("?x00?y3");
         Serial1.print(line);
 
@@ -478,7 +719,6 @@ void lcdUpdate(unsigned long now){
 
       Serial1.print("?x19?y0");
       Serial1.print(key);
-      firstDraw = false;
 
       switch(key){
         case NOKEY:
@@ -489,19 +729,20 @@ void lcdUpdate(unsigned long now){
           passi = 0;
           break;
         default:
+          //Serial.println(passi);
           password[passi] = key;
           passi++;
-          //Serial.println(password);
           if(passi >= 3){
             passi = 0;
             int res = strcmp(password, PASSWORD);
             if(res == 0){
               Serial1.print("?x18?y0");
-              Serial1.print('G');
-              //lcdUnlock = true;
+              Serial1.print('Y');
+              lcdUnlock = true;
+              firstDraw = true;
             }else{
               Serial1.print("?x18?y0");
-              Serial1.print('X');
+              Serial1.print('N');
             }
           }
       }
@@ -511,6 +752,122 @@ void lcdUpdate(unsigned long now){
 
     key = NOKEY;
   }
+}
+
+int getInt(char* title, int lower, int upper){
+  static boolean firstDraw = true;
+  static int digit = 0;
+  static int digits = snprintf(0,0,"%+d",upper)-1;
+  static char inBuf[3];
+
+  //Serial.println(digits);
+
+  int in;
+  int lim = 0;
+  boolean redraw = false;
+
+  if(upper > MAXINT){
+    upper = MAXINT;
+  }
+
+  if(firstDraw){
+    for(int i = 0; i < digits; i++){
+      inBuf[i] = '_';
+    }
+  }
+
+  switch(key){
+    case NOKEY:
+      break;
+    case ']':
+      break;
+    case '#':
+      break;
+    case '*':
+      break;
+    case 'U':
+      break;
+    case 'D':
+      break;
+    case 'L':
+      break;
+    case 'R':
+      break;
+    case 'E':
+      for(int i = 0; i < digits; i++){
+        if(inBuf[i] < '0' || inBuf[i] > '9'){
+          inBuf[i] = '0';
+        }
+      }
+      in = atoi(inBuf);
+      if(in < lower){
+        for(int i = 0; i < digits; i++){
+          inBuf[i] = '_';
+        }
+        redraw = true;
+        lim = -1;
+        digit = 0;
+        break;
+      }
+
+      if(in > upper){
+        for(int i = 0; i < digits; i++){
+          inBuf[i] = '_';
+        }
+        redraw = true;
+        lim = 1;
+        digit = 0;
+        break;
+      }
+      firstDraw = true;
+      digit = 0;
+      return in;
+
+      break;
+    case '^':
+      firstDraw = true;
+      digit = 0;
+      return -2;
+      break;
+    default:
+      if(digit < digits){
+        for(int i = 0; i < digits-1; i++){
+          inBuf[i] = inBuf[i+1];
+        }
+        inBuf[digits-1] = key;
+        digit++;
+        redraw = true;
+      }
+      lim = 0;
+  }
+
+  if(firstDraw || redraw){
+    Serial1.print("?f");
+
+    Serial1.print("?x00?y0");
+    Serial1.print(title);
+
+    Serial1.print("?x06?y1");
+    if(lim == -1){
+      Serial1.print("Too Low!");
+    }else if(lim == 1){
+      Serial1.print("Too High!");
+    }else{
+      char line[21];
+      int n = sprintf(line, "%i to %i", lower, upper);
+
+      Serial1.print("?x0");
+      Serial1.print(10-n/2);
+      Serial1.print(line);
+
+    }
+
+    Serial1.print("?x09?y2");
+    Serial1.print(inBuf);
+    firstDraw = false;
+  }
+
+  return -1;
 }
 
 #endif /* !AQUABOT */

@@ -22,4 +22,6 @@
 #define GREEN2 14
 #define BLUE2 16
 
+#define COOLTEMP A0
+
 #endif /* !PINS */

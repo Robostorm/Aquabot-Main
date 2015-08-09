@@ -17,13 +17,16 @@
 
 // LCD
 #define LCDDELAY 110UL
-#define LOADSCR 0
-#define MAINSCR 1
+#define DRAWDELAY 5000UL
+#define MAINMENU 0
+#define SETBTLS 1
+#define DISPBTLS 2
+#define LEDBRGHT 3
 #define PASSWORD "369"
 #define SELECT '>'
+#define MAXINT 999
 
 // Keypad
-#define KEYDELAY 0UL
 #define KEYROW 5
 #define KEYCOL 4
 #define NOKEY ' '
