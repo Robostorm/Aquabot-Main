@@ -497,7 +497,7 @@ void lcdUpdate(unsigned long now){
   boolean redraw = false;
 
   if(now - drawMillis >= DRAWDELAY){
-    redraw = true;
+    redraw = 1;
     //Serial.println("Redrawing");
     drawMillis = now;
   }
@@ -630,24 +630,64 @@ void lcdUpdate(unsigned long now){
 
           break;
         case 1:{ // Set Bottles
-          int tmp = getInt(" Bottles In Cooler", 0, 11);
-          switch(tmp){
-            case -1:
+
+          static boolean set = true;
+          switch(key){
+            case NOKEY:
               break;
-            case -2:
-              screen = MAINMENU;
-              curPos = 1;
-              firstDraw = true;
+            case 'L':
+              if(set == false){
+                set = true;
+                Serial1.print("?f");
+              }
               break;
-            default:
-              bottles = tmp;
-              screen = MAINMENU;
-              firstDraw = true;
+            case 'R':
+              if(set == true){
+                set = false;
+                Serial1.print("?f");
+              }
               break;
+          }
+
+
+          if(set){
+            //Serial.println("set");
+            int tmp = getInt(" Bottles In Cooler", 0, 11);
+            switch(tmp){
+              case -1:
+                break;
+              case -2:
+                screen = MAINMENU;
+                curPos = 1;
+                firstDraw = true;
+                break;
+              default:
+                bottles = tmp;
+                screen = MAINMENU;
+                firstDraw = true;
+                break;
+            }
+          }else{
+            //Serial.println("not set");
+            int tmp = getInt("    Bottles Sold", 0, 999);
+            switch(tmp){
+              case -1:
+                break;
+              case -2:
+                screen = MAINMENU;
+                curPos = 1;
+                firstDraw = true;
+                break;
+              default:
+                bottleSold = tmp;
+                screen = MAINMENU;
+                firstDraw = true;
+                break;
+            }
           }
           break;
         }
-        case 2:
+        case 2: // Dispense Bottle
           btd++;
           screen = MAINMENU;
           break;
@@ -673,26 +713,28 @@ void lcdUpdate(unsigned long now){
       }
     }else{
 
-      char line[21];
       //Serial.println(redraw);
-      if(firstDraw == 1 || redraw){
+      if(firstDraw == 1 || redraw == 1){
 
         Serial1.print("?f");
 
         Serial1.print("?x00?y0");
         Serial1.print("      Aquabot");
 
-        sprintf(line, "%s: %i%c", "Bottles Left", bottles, ' ');
+        char line1[21];
+        sprintf(line1, "%s: %i%c", "Bottles Left", bottles, ' ');
         Serial1.print("?x00?y1");
-        Serial1.print(line);
+        Serial1.print(line1);
 
-        sprintf(line, "%s: %i%c", "Bottles Sold", bottleSold, ' ');
+        char line2[21];
+        sprintf(line2, "%s: %i%c", "Bottles Sold", bottleSold, ' ');
         Serial1.print("?x00?y2");
-        Serial1.print(line);
+        Serial1.print(line2);
 
-        sprintf(line, "%s: %i%s", "Temperature", coolerTemp, "F    ");
+        char line3[21];
+        sprintf(line3, "%s: %i%s", "Temperature", coolerTemp, "F    ");
         Serial1.print("?x00?y3");
-        Serial1.print(line);
+        Serial1.print(line3);
 
         Serial1.print("?x19?y0");
         Serial1.print(key);
@@ -700,18 +742,21 @@ void lcdUpdate(unsigned long now){
       }
 
       if(bottles != oldBottles){
+        char line[21];
         sprintf(line, "%s: %i%c", "Bottles Left", bottles, ' ');
         Serial1.print("?x00?y1");
         Serial1.print(line);
       }
 
       if(bottleSold != oldBottleSold){
+        char line[21];
         sprintf(line, "%s: %i%c", "Bottles Sold", bottleSold, ' ');
         Serial1.print("?x00?y2");
         Serial1.print(line);
       }
 
       if(coolerTemp != oldCoolerTemp){
+        char line[21];
         sprintf(line, "%s: %i%c", "Temperature", coolerTemp, 'F');
         Serial1.print("?x00?y3");
         Serial1.print(line);
@@ -758,7 +803,16 @@ int getInt(char* title, int lower, int upper){
   static boolean firstDraw = true;
   static int digit = 0;
   static int digits = snprintf(0,0,"%+d",upper)-1;
-  static char inBuf[3];
+  //static int digits = upper > 0 ? (int) log10((double) upper) + 1 : 1;
+  static char inBuf[4];
+
+  static char oldTitle[21];
+
+  if(strcmp(title, oldTitle) != 0){
+    Serial.println("Changed!");
+    strcpy(oldTitle, title);
+    firstDraw = true;
+  }
 
   //Serial.println(digits);
 
@@ -771,10 +825,17 @@ int getInt(char* title, int lower, int upper){
   }
 
   if(firstDraw){
-    for(int i = 0; i < digits; i++){
-      inBuf[i] = '_';
+    digits = snprintf(0,0,"%+d",upper)-1;
+    for(int i = 0; i < sizeof(inBuf)-1; i++){
+      if(i < digits){
+        inBuf[i] = '_';
+      }else{
+        inBuf[i] = ' ';
+      }
     }
   }
+
+  Serial.println(digits);
 
   switch(key){
     case NOKEY:

@@ -24,4 +24,6 @@
 
 #define COOLTEMP A0
 
+#define TONEPIN 25
+
 #endif /* !PINS */
