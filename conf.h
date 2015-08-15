@@ -9,8 +9,8 @@
 // Dispenser
 #define SENSEDELAY 10UL
 #define MOTORDELAY 10UL
-#define SERVODELAY 1UL
-#define SERVOSTOP 400UL
+#define SERVODELAY 10UL
+#define SERVOSTOP 500UL
 #define SERVOSTEP 1
 #define SERVOMIN 45
 #define SERVOMAX 135

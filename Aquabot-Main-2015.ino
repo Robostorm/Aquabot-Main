@@ -21,9 +21,6 @@
 //#include "LedStrip.h"
 //#include "LedPattern.h"
 
-//LedStrip topLeds = LedStrip(RED2, GREEN2, BLUE2, "Top Leds");
-//LedStrip frontLeds = LedStrip(RED1, GREEN1, BLUE1, "Front Leds");
-
 int bottles = 10;
 int bottleSold = 0;
 int coolerTemp = 0;
