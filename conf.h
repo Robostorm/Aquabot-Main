@@ -9,8 +9,8 @@
 // Dispenser
 #define SENSEDELAY 10UL
 #define MOTORDELAY 10UL
-#define SERVODELAY 10UL
-#define SERVOSTOP 500UL
+#define SERVODELAY 1UL
+#define SERVOSTOP 700UL
 #define SERVOSTEP 1
 #define SERVOMIN 45
 #define SERVOMAX 135
@@ -18,6 +18,8 @@
 // LCD
 #define LCDDELAY 110UL
 #define DRAWDELAY 5000UL
+#define LCDWIDTH 20
+#define LCDHEIGHT 4
 #define MAINMENU 0
 #define SETBTLS 1
 #define DISPBTLS 2

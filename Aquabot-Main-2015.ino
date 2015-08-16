@@ -491,6 +491,8 @@ void lcdUpdate(unsigned long now){
 
   static int screen = MAINMENU;
 
+  static char lines[LCDWIDTH+1][LCDHEIGHT];
+
   boolean redraw = false;
 
   if(now - drawMillis >= DRAWDELAY){
