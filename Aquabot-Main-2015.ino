@@ -38,9 +38,6 @@ PWMServo servo;
 int motorPower = 0;
 int servoPos = SERVOMIN;
 
-char* password = "   ";
-int passi = 0;
-
 int btd = 0; // Bottles to dispense
 
 int ledBrightness = 100;
@@ -54,8 +51,6 @@ char oldLine0[LCDWIDTH+1];
 char oldLine1[LCDWIDTH+1];
 char oldLine2[LCDWIDTH+1];
 char oldLine3[LCDWIDTH+1];
-
-boolean lcdUnlock = false;
 
 char keys[KEYROW][KEYCOL] = {
   {'L','0','R','E'},
@@ -524,8 +519,6 @@ void keyUpdate(unsigned long now){
         sprintf(line2, "%s: %i%c", "Bottles Sold", bottleSold, ' ');
         sprintf(line3, "%s: %i%c", "Cooler Temp", coolerTemp, 'F');
 
-        line0[19] = key;
-
         static int passIndex = 0;
         static char password[PASSLEN];
 
@@ -543,6 +536,7 @@ void keyUpdate(unsigned long now){
               int res = strcmp(password, PASSWORD);
               if(res == 0){
                 line0[18] = PASSACPT;
+                screen = MAINMENU;
               }else{
                 line0[18] = PASSDENY;
               }
@@ -553,14 +547,122 @@ void keyUpdate(unsigned long now){
       }
 
       case MAINMENU:{
+
+        static int curPos = 1;
+
         strcpy(line0, "      Main Menu     ");
         strcpy(line1, " Set Bottles        ");
         strcpy(line2, " Dispense Bottle    ");
         strcpy(line3, " Set LED Brightness ");
+
+
+
+        switch(key){
+          case NOKEY:
+            break;
+          case 'U':
+            if(curPos > 1){
+              curPos--;
+            }else{
+              curPos = 3;
+            }
+            break;
+          case 'D':
+            if(curPos < 3){
+              curPos++;
+            }else{
+              curPos = 1;
+            }
+            break;
+          case '^':
+            screen = MAINSCRN;
+            break;
+          case 'E':
+            switch(curPos){
+              case 1:
+                screen = SETBTLS;
+                break;
+              case 2:
+                screen = DISPBTLS;
+                break;
+              case 3:
+                screen = LEDBRGHT;
+                break;
+            }
+            break;
+        }
+
+        switch(curPos){
+          case 1:
+            line1[0] = SELECT;
+            break;
+          case 2:
+            line2[0] = SELECT;
+            break;
+          case 3:
+            line3[0] = SELECT;
+            break;
+        }
+        break;
+      }
+
+      case SETBTLS:{
+        static boolean set = true;
+        switch(key){
+          case NOKEY:
+            break;
+          case 'L':
+            if(set == false){
+              set = true;
+              //Serial1.print("?f");
+            }
+            break;
+          case 'R':
+            if(set == true){
+              set = false;
+              //Serial1.print("?f");
+            }
+            break;
+        }
+
+
+        if(set){
+          //Serial.println("set");
+          int tmp = getInt(" Bottles In Cooler", 0, MAXBTLS);
+          strcpy(line3, "     Bottles Sold ->");
+
+          switch(tmp){
+            case -1:
+              break;
+            case -2:
+              screen = MAINMENU;
+              break;
+            default:
+              bottles = tmp;
+              screen = MAINMENU;
+              break;
+          }
+        }else{
+          //Serial.println("not set");
+          int tmp = getInt("    Bottles Sold", 0, 999);
+          strcpy(line3, "<- Bottles in Cooler");
+          switch(tmp){
+            case -1:
+              break;
+            case -2:
+              screen = MAINMENU;
+              break;
+            default:
+              bottleSold = tmp;
+              screen = MAINMENU;
+              break;
+          }
+        }
+        break;
       }
     }
 
-
+    line0[19] = key;
 
     keyMillis = now;
 
@@ -569,6 +671,31 @@ void keyUpdate(unsigned long now){
 }
 
 void lcdUpdate(unsigned long now){
+  static unsigned long drawMillis = 0UL;
+
+  if(now - drawMillis >= DRAWDELAY){
+    Serial1.print("?x00");
+    Serial1.print("?y0");
+    Serial1.print(line0);
+    Serial1.print("?x00");
+    Serial1.print("?y1");
+    Serial1.print(line1);
+    Serial1.print("?x00");
+    Serial1.print("?y2");
+    Serial1.print(line2);
+    Serial1.print("?x00");
+    Serial1.print("?y3");
+    Serial1.print(line3);
+
+    strcpy(oldLine0, line0);
+    strcpy(oldLine1, line1);
+    strcpy(oldLine2, line2);
+    strcpy(oldLine3, line3);
+
+    drawMillis = now;
+  }
+
+
   static unsigned long lcdMillis = 0UL;
 
   if(now - lcdMillis >= LCDDELAY){
@@ -623,25 +750,7 @@ void lcdUpdate(unsigned long now){
     lcdMillis = now;
   }
 
-  static unsigned long drawMillis = 0UL;
 
-  if(now - drawMillis >= DRAWDELAY){
-    Serial1.print("?x00");
-    Serial1.print("?y0");
-    Serial1.print(line0);
-    Serial1.print("?x00");
-    Serial1.print("?y1");
-    Serial1.print(line1);
-    Serial1.print("?x00");
-    Serial1.print("?y2");
-    Serial1.print(line2);
-    Serial1.print("?x00");
-    Serial1.print("?y3");
-    Serial1.print(line3);
-
-    drawMillis = now;
-
-  }
 }
 
 int getInt(char* title, int lower, int upper){
@@ -678,6 +787,7 @@ int getInt(char* title, int lower, int upper){
         inBuf[i] = ' ';
       }
     }
+    firstDraw = false;
   }
 
   Serial.println(digits);
@@ -710,7 +820,6 @@ int getInt(char* title, int lower, int upper){
         for(int i = 0; i < digits; i++){
           inBuf[i] = '_';
         }
-        redraw = true;
         lim = -1;
         digit = 0;
         break;
@@ -720,18 +829,16 @@ int getInt(char* title, int lower, int upper){
         for(int i = 0; i < digits; i++){
           inBuf[i] = '_';
         }
-        redraw = true;
         lim = 1;
         digit = 0;
         break;
       }
-      firstDraw = true;
       digit = 0;
+      firstDraw = true;
       return in;
 
       break;
     case '^':
-      firstDraw = true;
       digit = 0;
       return -2;
       break;
@@ -742,36 +849,33 @@ int getInt(char* title, int lower, int upper){
         }
         inBuf[digits-1] = key;
         digit++;
-        redraw = true;
       }
       lim = 0;
   }
 
-  if(firstDraw || redraw){
-    Serial1.print("?f");
+  strcpy(line0, title);
 
-    Serial1.print("?x00?y0");
-    Serial1.print(title);
+  if(lim == -1){
+    strcpy(line1, "      Too Low!      ");
+  }else if(lim == 1){
+    strcpy(line1, "      Too High!     ");
+  }else{
+    char line[LCDWIDTH+1];
+    int n = sprintf(line, "%i to %i", lower, upper);
+    int l = LCDWIDTH/2-n/2;
 
-    Serial1.print("?x06?y1");
-    if(lim == -1){
-      Serial1.print("Too Low!");
-    }else if(lim == 1){
-      Serial1.print("Too High!");
-    }else{
-      char line[21];
-      int n = sprintf(line, "%i to %i", lower, upper);
-
-      Serial1.print("?x0");
-      Serial1.print(10-n/2);
-      Serial1.print(line);
-
+    for(int i = 0; i < n; i++){
+      line1[i+l] = line[i];
     }
-
-    Serial1.print("?x09?y2");
-    Serial1.print(inBuf);
-    firstDraw = false;
   }
+
+  int l = LCDWIDTH/2-digits/2;
+  for(int i = 0; i < digits; i++){
+    line2[i+l] = inBuf[i];
+  }
+
+  strcpy(line3, "                    ");
+
 
   return -1;
 }

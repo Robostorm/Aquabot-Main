@@ -14,10 +14,11 @@
 #define SERVOSTEP 1
 #define SERVOMIN 45
 #define SERVOMAX 135
+#define MAXBTLS 10
 
 // LCD
 #define LCDDELAY 100UL
-#define DRAWDELAY 5000UL
+#define DRAWDELAY 1000UL
 #define LCDWIDTH 20
 #define LCDHEIGHT 4
 #define MAINSCRN 0
