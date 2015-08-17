@@ -517,7 +517,7 @@ void keyUpdate(unsigned long now){
         strcpy(line0, "      Aquabot       ");
         sprintf(line1, "%s: %i%c", "Bottles Left", bottles, ' ');
         sprintf(line2, "%s: %i%c", "Bottles Sold", bottleSold, ' ');
-        sprintf(line3, "%s: %i%c", "Cooler Temp", coolerTemp, 'F');
+        sprintf(line3, "%s: %i%s", "Cooler Temp", coolerTemp, "F   ");
 
         static int passIndex = 0;
         static char password[PASSLEN];
@@ -614,13 +614,11 @@ void keyUpdate(unsigned long now){
           case 'L':
             if(set == false){
               set = true;
-              //Serial1.print("?f");
             }
             break;
           case 'R':
             if(set == true){
               set = false;
-              //Serial1.print("?f");
             }
             break;
         }
@@ -628,7 +626,7 @@ void keyUpdate(unsigned long now){
 
         if(set){
           //Serial.println("set");
-          int tmp = getInt(" Bottles In Cooler", 0, MAXBTLS);
+          int tmp = getInt(" Bottles In Cooler  ", 0, MAXBTLS);
           strcpy(line3, "     Bottles Sold ->");
 
           switch(tmp){
@@ -644,7 +642,7 @@ void keyUpdate(unsigned long now){
           }
         }else{
           //Serial.println("not set");
-          int tmp = getInt("    Bottles Sold", 0, 999);
+          int tmp = getInt("    Bottles Sold    ", 0, 999);
           strcpy(line3, "<- Bottles in Cooler");
           switch(tmp){
             case -1:
@@ -658,6 +656,13 @@ void keyUpdate(unsigned long now){
               break;
           }
         }
+        break;
+      }
+
+      case DISPBTLS:{ // Dispense Bottle
+        strcpy(line1, "   Dispensing...    ");
+        btd++;
+        screen = MAINMENU;
         break;
       }
     }
