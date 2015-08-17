@@ -5,6 +5,7 @@
 //-*-C++-*-
 //https://github.com/Robostorm/Aquabot-Bill-Feed-Dispencer/tree/2015
 /* File Aquabot-Main-2015.ino  */
+
 #ifndef AQUABOT
 #define AQUABOT
 
@@ -14,13 +15,6 @@
 #include "conf.h"
 #include "states.h"
 
-//#define DEBUGLEDS
-
-//#include "Dispenser.h"
-//#include "Lcd.h"
-//#include "LedStrip.h"
-//#include "LedPattern.h"
-
 int bottles = 10;
 int bottleSold = 0;
 int coolerTemp = 0;
@@ -29,9 +23,11 @@ int ledState;
 int irState;
 int photoState;
 
-int dispState = DISPREADY;
+int moneyState = DISPREADY;
 int servoState = 0;
 int servoWait;
+
+boolean dispensing = false;
 
 PWMServo servo;
 
@@ -102,7 +98,6 @@ void loop(){
   ledStripUpdate(now);
   keyUpdate(now);
   lcdUpdate(now);
-  //Serial.println(now-oldNow);
   oldNow = now;
 }
 
@@ -148,7 +143,7 @@ void ledStripUpdate(unsigned long now){
     static double oldGreen2 = 0;
     static double oldBlue2 = 0;
 
-    if(dispState == DISPDISPENSING){
+    if(moneyState == DISPDISPENSING){
       green1 = 255;
       switch(flashState){
         case 0:
@@ -170,7 +165,7 @@ void ledStripUpdate(unsigned long now){
           }
           break;
       }
-    }else if(dispState == DISPGETTING){
+    }else if(moneyState == DISPGETTING){
       red1 = 255;
       switch(flashState){
         case 0:
@@ -344,19 +339,16 @@ void ledStripUpdate(unsigned long now){
 
 void moneyUpdate(unsigned long now){
 
-  switch(dispState){
+  switch(moneyState){
   case DISPREADY:
     if(irState == LOW && bottles > 0){
-      //if(bottles == 0)
-        dispState = GETTING;
+      moneyState = GETTING;
     }
-    //servoState = 0;
-    //servoWait = 0;
     break;
   case DISPGETTING:
     motorPower = 255;
     if(photoState == HIGH) {
-      dispState = DISPENSING;
+      moneyState = DISPENSING;
     }
     break;
   case DISPDISPENSING:
@@ -365,16 +357,11 @@ void moneyUpdate(unsigned long now){
     }else{
       motorPower = 0;
       btd++;
-      dispState = DISPDONE;
-      //int done = dispense(now);
-      //if(done == 1){
-      //  dispState = DISPDONE;
-      //}
+      moneyState = DISPDONE;
     }
     break;
-
   case DISPDONE:
-    dispState = READY;
+    moneyState = READY;
     bottles--;
     bottleSold++;
     break;
@@ -382,28 +369,12 @@ void moneyUpdate(unsigned long now){
 }
 
 void dispenserUpdate(unsigned long now){
-  static boolean dispensing  = false;
-
-  //Serial.print(btd);
-  //Serial.print(":");
-  //Serial.println(dispensing);
-
 
   if(dispensing){
-    int tmp = dispense(now);
-    if(tmp == 1){
-      //Serial.print(":");
-      //Serial.println("Done");
-      dispensing = false;
-      btd--;
-    }
+    dispense(now);
   }else{
     if(btd > 0){
-      //Serial.print(":");
-      //Serial.println("Bottles");
       dispensing = true;
-      servoState = 0;
-      servoWait = 0;
     }
   }
 
@@ -431,61 +402,62 @@ void motorUpdate(unsigned long now){
   }
 }
 
-int dispense(unsigned long now){
+void dispense(unsigned long now){
 
   static unsigned long servoMillis = 0UL;
 
-  //Serial.println(now-servoMillis);
-
 
   if(now - servoMillis >= SERVODELAY){
+    Serial.println(servoState);
 
-    //Serial.print(servoState);
-    //Serial.print(":");
-    //Serial.print(servoPos);
-    //Serial.print(":");
-    //Serial.print(servoWait);
-    //Serial.print(":");
-    //Serial.print(now - servoMillis);
-    //Serial.print(":");
-    //Serial.println(now);
-
-    if(servoState == 0){
-      if(servoPos < SERVOMAX){
-        servoPos += SERVOSTEP;
-      }else{
-        servoState = 1;
+    switch(servoState){
+      case 0:{
+        if(servoPos < SERVOMAX){
+          servoPos += SERVOSTEP;
+          break;
+        }else{
+          servoState = 1;
+          break;
+        }
+        break;
       }
-    }
-
-    if(servoState == 1){
-      if(servoWait < SERVOSTOP/SERVODELAY){
-        servoWait++;
-      }else{
-        servoWait = 0;
-        servoState = 2;
+      case 1:{
+        if(servoWait < SERVOSTOP/SERVODELAY){
+          servoWait++;
+          break;
+        }else{
+          servoWait = 0;
+          servoState = 2;
+          break;
+        }
+        break;
       }
-    }
-
-    if(servoState == 2){
-      if(servoPos > SERVOMIN){
-        servoPos -= SERVOSTEP;
-      }else{
-        servoState = 3;
+      case 2:{
+        if(servoPos > SERVOMIN){
+          servoPos -= SERVOSTEP;
+          break;
+        }else{
+          servoState = 3;
+          break;
+        }
+        break;
       }
-    }
-
-    if(servoState == 3){
-      if(servoWait < SERVOSTOP/SERVODELAY){
-        servoWait++;
-      }else{
-        servoState = 0;
-        return 1;
+      case 3:{
+        if(servoWait < SERVOSTOP/SERVODELAY){
+          servoWait++;
+          break;
+        }else{
+          servoState = 0;
+          servoWait = 0;
+          dispensing = false;
+          btd--;
+          break;
+        }
+        break;
       }
     }
 
     servoMillis = now;
-    return 0;
   }
 }
 
@@ -497,15 +469,11 @@ void keyUpdate(unsigned long now){
   static int screen = MAINSCRN;
 
   if(now - keyMillis >= KEYDELAY){
-    //Serial.println(now - lcdMillis);
 
     char nkey = keypad.getKey();
     if (nkey){
       key = nkey;
     }
-
-    //Serial.print(key);
-    //Serial.println();
 
     strcpy(line0, "                    ");
     strcpy(line1, "                    ");
@@ -625,7 +593,6 @@ void keyUpdate(unsigned long now){
 
 
         if(set){
-          //Serial.println("set");
           int tmp = getInt(" Bottles In Cooler  ", 0, MAXBTLS);
           strcpy(line3, "     Bottles Sold ->");
 
@@ -641,7 +608,6 @@ void keyUpdate(unsigned long now){
               break;
           }
         }else{
-          //Serial.println("not set");
           int tmp = getInt("    Bottles Sold    ", 0, MAXINT);
           strcpy(line3, "<- Bottles in Cooler");
           switch(tmp){
@@ -778,7 +744,6 @@ int getInt(char* title, int lower, int upper){
   static boolean firstDraw = true;
   static int digit = 0;
   static int digits = snprintf(0,0,"%+d",upper)-1;
-  //static int digits = upper > 0 ? (int) log10((double) upper) + 1 : 1;
   static char inBuf[4];
 
   static char oldTitle[21];
@@ -789,11 +754,8 @@ int getInt(char* title, int lower, int upper){
     firstDraw = true;
   }
 
-  //Serial.println(digits);
-
   int in;
   int lim = 0;
-  boolean redraw = false;
 
   if(upper > MAXINT){
     upper = MAXINT;
@@ -861,6 +823,7 @@ int getInt(char* title, int lower, int upper){
       break;
     case '^':
       digit = 0;
+      firstDraw = true;
       return -2;
       break;
     default:
