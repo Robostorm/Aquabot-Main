@@ -16,20 +16,25 @@
 #define SERVOMAX 135
 
 // LCD
-#define LCDDELAY 500UL
+#define LCDDELAY 100UL
 #define DRAWDELAY 5000UL
 #define LCDWIDTH 20
 #define LCDHEIGHT 4
-#define MAINMENU 0
-#define SETBTLS 1
-#define DISPBTLS 2
-#define LEDBRGHT 3
+#define MAINSCRN 0
+#define MAINMENU 1
+#define SETBTLS 2
+#define DISPBTLS 3
+#define LEDBRGHT 4
 #define PASSWORD "369"
+#define PASSSTRT '#'
+#define PASSLEN 3
+#define PASSACPT 'Y'
+#define PASSDENY 'N'
 #define SELECT '>'
 #define MAXINT 999
 
 // Keypad
-#define KEYDELAY 10UL
+#define KEYDELAY 100UL
 #define KEYROW 5
 #define KEYCOL 4
 #define NOKEY ' '

@@ -50,6 +50,11 @@ char line1[LCDWIDTH+1];
 char line2[LCDWIDTH+1];
 char line3[LCDWIDTH+1];
 
+char oldLine0[LCDWIDTH+1];
+char oldLine1[LCDWIDTH+1];
+char oldLine2[LCDWIDTH+1];
+char oldLine3[LCDWIDTH+1];
+
 boolean lcdUnlock = false;
 
 char keys[KEYROW][KEYCOL] = {
@@ -102,7 +107,7 @@ void loop(){
   ledStripUpdate(now);
   keyUpdate(now);
   lcdUpdate(now);
-  Serial.println(now-oldNow);
+  //Serial.println(now-oldNow);
   oldNow = now;
 }
 
@@ -494,7 +499,7 @@ void keyUpdate(unsigned long now){
 
   static int curPos = 1;
 
-  static int screen = MAINMENU;
+  static int screen = MAINSCRN;
 
   if(now - keyMillis >= KEYDELAY){
     //Serial.println(now - lcdMillis);
@@ -504,9 +509,7 @@ void keyUpdate(unsigned long now){
       key = nkey;
     }
 
-    //Serial.print(screen);
-    //Serial.print(":");
-    //Serial.print(firstDraw);
+    //Serial.print(key);
     //Serial.println();
 
     strcpy(line0, "                    ");
@@ -514,10 +517,50 @@ void keyUpdate(unsigned long now){
     strcpy(line2, "                    ");
     strcpy(line3, "                    ");
 
-    strcpy(line0, "      Aquabot       ");
-    sprintf(line1, "%s: %i%c", "Bottles Left", bottles, ' ');
-    sprintf(line2, "%s: %i%c", "Bottles Sold", bottleSold, ' ');
-    sprintf(line3, "%s: %i%c", "Cooler Temp", coolerTemp, 'F');
+    switch(screen){
+      case MAINSCRN:{
+        strcpy(line0, "      Aquabot       ");
+        sprintf(line1, "%s: %i%c", "Bottles Left", bottles, ' ');
+        sprintf(line2, "%s: %i%c", "Bottles Sold", bottleSold, ' ');
+        sprintf(line3, "%s: %i%c", "Cooler Temp", coolerTemp, 'F');
+
+        line0[19] = key;
+
+        static int passIndex = 0;
+        static char password[PASSLEN];
+
+        switch(key){
+          case NOKEY:
+            break;
+          case PASSSTRT:
+            passIndex = 0;
+            break;
+          default:
+            password[passIndex] = key;
+            passIndex++;
+            if(passIndex >= 3){
+              passIndex = 0;
+              int res = strcmp(password, PASSWORD);
+              if(res == 0){
+                line0[18] = PASSACPT;
+              }else{
+                line0[18] = PASSDENY;
+              }
+            }
+        }
+
+        break;
+      }
+
+      case MAINMENU:{
+        strcpy(line0, "      Main Menu     ");
+        strcpy(line1, " Set Bottles        ");
+        strcpy(line2, " Dispense Bottle    ");
+        strcpy(line3, " Set LED Brightness ");
+      }
+    }
+
+
 
     keyMillis = now;
 
@@ -528,7 +571,61 @@ void keyUpdate(unsigned long now){
 void lcdUpdate(unsigned long now){
   static unsigned long lcdMillis = 0UL;
 
-if(now - lcdMillis >= LCDDELAY){
+  if(now - lcdMillis >= LCDDELAY){
+
+    Serial1.print("?y0");
+    for(int i = 0; i <= LCDWIDTH; i++){
+      if(line0[i] != oldLine0[i]){
+        char x[3];
+        sprintf(x, "%02i", i);
+        Serial1.print("?x");
+        Serial1.print(x);
+        Serial1.print(line0[i]);
+        oldLine0[i] = line0[i];
+      }
+    }
+
+    Serial1.print("?y1");
+    for(int i = 0; i <= LCDWIDTH; i++){
+      if(line1[i] != oldLine1[i]){
+        char x[3];
+        sprintf(x, "%02i", i);
+        Serial1.print("?x");
+        Serial1.print(x);
+        Serial1.print(line1[i]);
+        oldLine1[i] = line1[i];
+      }
+    }
+
+    Serial1.print("?y2");
+    for(int i = 0; i <= LCDWIDTH; i++){
+      if(line2[i] != oldLine2[i]){
+        char x[3];
+        sprintf(x, "%02i", i);
+        Serial1.print("?x");
+        Serial1.print(x);
+        Serial1.print(line2[i]);
+        oldLine2[i] = line2[i];
+      }
+    }
+
+    Serial1.print("?y3");
+    for(int i = 0; i <= LCDWIDTH; i++){
+      if(line3[i] != oldLine3[i]){
+        char x[3];
+        sprintf(x, "%02i", i);
+        Serial1.print("?x");
+        Serial1.print(x);
+        Serial1.print(line3[i]);
+        oldLine3[i] = line3[i];
+      }
+    }
+    lcdMillis = now;
+  }
+
+  static unsigned long drawMillis = 0UL;
+
+  if(now - drawMillis >= DRAWDELAY){
     Serial1.print("?x00");
     Serial1.print("?y0");
     Serial1.print(line0);
@@ -542,7 +639,8 @@ if(now - lcdMillis >= LCDDELAY){
     Serial1.print("?y3");
     Serial1.print(line3);
 
-    lcdMillis = now;
+    drawMillis = now;
+
   }
 }
 
