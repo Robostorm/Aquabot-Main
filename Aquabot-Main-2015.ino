@@ -45,6 +45,11 @@ int btd = 0; // Bottles to dispense
 
 int ledBrightness = 100;
 
+char line0[LCDWIDTH+1];
+char line1[LCDWIDTH+1];
+char line2[LCDWIDTH+1];
+char line3[LCDWIDTH+1];
+
 boolean lcdUnlock = false;
 
 char keys[KEYROW][KEYCOL] = {
@@ -74,6 +79,11 @@ void setup(){
   pinMode(SERVOPIN, OUTPUT);
   pinMode(LEDPIN, OUTPUT);
 
+  strcpy(line0, "      Aquabot       ");
+  strcpy(line1, "      Test1         ");
+  strcpy(line2, "      2Test         ");
+  strcpy(line3, "    ThreeTest       ");
+
   delay(5000);
   Serial1.print("?f");
   Serial1.print("?c0");
@@ -90,8 +100,9 @@ void loop(){
   moneyUpdate(now);
   dispenserUpdate(now);
   ledStripUpdate(now);
+  keyUpdate(now);
   lcdUpdate(now);
-  //Serial.println(now-oldNow);
+  Serial.println(now-oldNow);
   oldNow = now;
 }
 
@@ -478,30 +489,14 @@ int dispense(unsigned long now){
   }
 }
 
-void lcdUpdate(unsigned long now){
-  static unsigned long drawMillis = 0UL;
-  static unsigned long lcdMillis = 0UL;
-  static boolean firstDraw = true;
-
-  static int oldBottles = bottles;
-  static int oldBottleSold = bottleSold;
-  static int oldCoolerTemp = coolerTemp;
+void keyUpdate(unsigned long now){
+  static unsigned long keyMillis = 0UL;
 
   static int curPos = 1;
 
   static int screen = MAINMENU;
 
-  static char lines[LCDWIDTH+1][LCDHEIGHT];
-
-  boolean redraw = false;
-
-  if(now - drawMillis >= DRAWDELAY){
-    redraw = 1;
-    //Serial.println("Redrawing");
-    drawMillis = now;
-  }
-
-  if(now - lcdMillis >= LCDDELAY){
+  if(now - keyMillis >= KEYDELAY){
     //Serial.println(now - lcdMillis);
 
     char nkey = keypad.getKey();
@@ -514,287 +509,40 @@ void lcdUpdate(unsigned long now){
     //Serial.print(firstDraw);
     //Serial.println();
 
-    if(lcdUnlock){
-      switch(screen){
-        case 0: // Main Menu
-          if(firstDraw){
+    strcpy(line0, "                    ");
+    strcpy(line1, "                    ");
+    strcpy(line2, "                    ");
+    strcpy(line3, "                    ");
 
-            Serial1.print("?f");
+    strcpy(line0, "      Aquabot       ");
+    sprintf(line1, "%s: %i%c", "Bottles Left", bottles, ' ');
+    sprintf(line2, "%s: %i%c", "Bottles Sold", bottleSold, ' ');
+    sprintf(line3, "%s: %i%c", "Cooler Temp", coolerTemp, 'F');
 
-            Serial1.print("?x00?y0");
-            Serial1.print("     Main Menu");
-
-            Serial1.print("?x01?y1");
-            Serial1.print("Set Bottles");
-
-            Serial1.print("?x01?y2");
-            Serial1.print("Dispense Bottle");
-
-            Serial1.print("?x01?y3");
-            Serial1.print("Set LEDs Brightness");
-
-            switch(curPos){
-              case 1:
-                Serial1.print("?x00?y1");
-                Serial1.print(">");
-                Serial1.print("?x00?y2");
-                Serial1.print(' ');
-                Serial1.print("?x00?y3");
-                Serial1.print(' ');
-                break;
-              case 2:
-                Serial1.print("?x00?y1");
-                Serial1.print(' ');
-                Serial1.print("?x00?y2");
-                Serial1.print(">");
-                Serial1.print("?x00?y3");
-                Serial1.print(' ');
-                break;
-              case 3:
-                Serial1.print("?x00?y1");
-                Serial1.print(' ');
-                Serial1.print("?x00?y2");
-                Serial1.print(' ');
-                Serial1.print("?x00?y3");
-                Serial1.print(">");
-                break;
-            }
-
-            firstDraw = false;
-          }
-
-          Serial1.print("?x19?y0");
-          Serial1.print(key);
-          Serial1.print("?x18?y0");
-          Serial1.print(curPos);
-
-
-          switch(key){
-            case NOKEY:
-              break;
-            case 'U':
-              if(curPos > 1){
-                curPos--;
-              }else{
-                curPos = 3;
-              }
-              redraw = true;
-              break;
-            case 'D':
-              if(curPos < 3){
-                curPos++;
-              }else{
-                curPos = 1;
-              }
-              redraw = true;
-              break;
-            case '^':
-              firstDraw = true;
-              lcdUnlock = false;
-              break;
-            case 'E':
-              screen = curPos;
-              break;
-          }
-
-          if(redraw){
-
-            switch(curPos){
-              case 1:
-                Serial1.print("?x00?y1");
-                Serial1.print(">");
-                Serial1.print("?x00?y2");
-                Serial1.print(' ');
-                Serial1.print("?x00?y3");
-                Serial1.print(' ');
-                break;
-              case 2:
-                Serial1.print("?x00?y1");
-                Serial1.print(' ');
-                Serial1.print("?x00?y2");
-                Serial1.print(">");
-                Serial1.print("?x00?y3");
-                Serial1.print(' ');
-                break;
-              case 3:
-                Serial1.print("?x00?y1");
-                Serial1.print(' ');
-                Serial1.print("?x00?y2");
-                Serial1.print(' ');
-                Serial1.print("?x00?y3");
-                Serial1.print(">");
-                break;
-            }
-          }
-
-          break;
-        case 1:{ // Set Bottles
-
-          static boolean set = true;
-          switch(key){
-            case NOKEY:
-              break;
-            case 'L':
-              if(set == false){
-                set = true;
-                Serial1.print("?f");
-              }
-              break;
-            case 'R':
-              if(set == true){
-                set = false;
-                Serial1.print("?f");
-              }
-              break;
-          }
-
-
-          if(set){
-            //Serial.println("set");
-            int tmp = getInt(" Bottles In Cooler", 0, 11);
-            switch(tmp){
-              case -1:
-                break;
-              case -2:
-                screen = MAINMENU;
-                curPos = 1;
-                firstDraw = true;
-                break;
-              default:
-                bottles = tmp;
-                screen = MAINMENU;
-                firstDraw = true;
-                break;
-            }
-          }else{
-            //Serial.println("not set");
-            int tmp = getInt("    Bottles Sold", 0, 999);
-            switch(tmp){
-              case -1:
-                break;
-              case -2:
-                screen = MAINMENU;
-                curPos = 1;
-                firstDraw = true;
-                break;
-              default:
-                bottleSold = tmp;
-                screen = MAINMENU;
-                firstDraw = true;
-                break;
-            }
-          }
-          break;
-        }
-        case 2: // Dispense Bottle
-          btd++;
-          screen = MAINMENU;
-          break;
-
-        case 3:{ // Set Brightness
-          int tmp = getInt(" Brightness of LEDs", 0, 100);
-          switch(tmp){
-            case -1:
-              break;
-            case -2:
-              screen = MAINMENU;
-              curPos = 3;
-              firstDraw = true;
-              break;
-            default:
-              ledBrightness = tmp;
-              screen = MAINMENU;
-              firstDraw = true;
-              break;
-          }
-          break;
-        }
-      }
-    }else{
-
-      //Serial.println(redraw);
-      if(firstDraw == 1 || redraw == 1){
-
-        Serial1.print("?f");
-
-        Serial1.print("?x00?y0");
-        Serial1.print("      Aquabot");
-
-        char line1[21];
-        sprintf(line1, "%s: %i%c", "Bottles Left", bottles, ' ');
-        Serial1.print("?x00?y1");
-        Serial1.print(line1);
-
-        char line2[21];
-        sprintf(line2, "%s: %i%c", "Bottles Sold", bottleSold, ' ');
-        Serial1.print("?x00?y2");
-        Serial1.print(line2);
-
-        char line3[21];
-        sprintf(line3, "%s: %i%s", "Temperature", coolerTemp, "F    ");
-        Serial1.print("?x00?y3");
-        Serial1.print(line3);
-
-        Serial1.print("?x19?y0");
-        Serial1.print(key);
-        firstDraw = false;
-      }
-
-      if(bottles != oldBottles){
-        char line[21];
-        sprintf(line, "%s: %i%c", "Bottles Left", bottles, ' ');
-        Serial1.print("?x00?y1");
-        Serial1.print(line);
-      }
-
-      if(bottleSold != oldBottleSold){
-        char line[21];
-        sprintf(line, "%s: %i%c", "Bottles Sold", bottleSold, ' ');
-        Serial1.print("?x00?y2");
-        Serial1.print(line);
-      }
-
-      if(coolerTemp != oldCoolerTemp){
-        char line[21];
-        sprintf(line, "%s: %i%c", "Temperature", coolerTemp, 'F');
-        Serial1.print("?x00?y3");
-        Serial1.print(line);
-      }
-
-      Serial1.print("?x19?y0");
-      Serial1.print(key);
-
-      switch(key){
-        case NOKEY:
-          Serial1.print("?x18?y0");
-          Serial1.print(' ');
-          break;
-        case '#':
-          passi = 0;
-          break;
-        default:
-          //Serial.println(passi);
-          password[passi] = key;
-          passi++;
-          if(passi >= 3){
-            passi = 0;
-            int res = strcmp(password, PASSWORD);
-            if(res == 0){
-              Serial1.print("?x18?y0");
-              Serial1.print('Y');
-              lcdUnlock = true;
-              firstDraw = true;
-            }else{
-              Serial1.print("?x18?y0");
-              Serial1.print('N');
-            }
-          }
-      }
-    }
-
-    lcdMillis = now;
+    keyMillis = now;
 
     key = NOKEY;
+  }
+}
+
+void lcdUpdate(unsigned long now){
+  static unsigned long lcdMillis = 0UL;
+
+if(now - lcdMillis >= LCDDELAY){
+    Serial1.print("?x00");
+    Serial1.print("?y0");
+    Serial1.print(line0);
+    Serial1.print("?x00");
+    Serial1.print("?y1");
+    Serial1.print(line1);
+    Serial1.print("?x00");
+    Serial1.print("?y2");
+    Serial1.print(line2);
+    Serial1.print("?x00");
+    Serial1.print("?y3");
+    Serial1.print(line3);
+
+    lcdMillis = now;
   }
 }
 

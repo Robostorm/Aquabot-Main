@@ -16,7 +16,7 @@
 #define SERVOMAX 135
 
 // LCD
-#define LCDDELAY 110UL
+#define LCDDELAY 500UL
 #define DRAWDELAY 5000UL
 #define LCDWIDTH 20
 #define LCDHEIGHT 4
@@ -29,6 +29,7 @@
 #define MAXINT 999
 
 // Keypad
+#define KEYDELAY 10UL
 #define KEYROW 5
 #define KEYCOL 4
 #define NOKEY ' '
