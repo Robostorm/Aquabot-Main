@@ -642,7 +642,7 @@ void keyUpdate(unsigned long now){
           }
         }else{
           //Serial.println("not set");
-          int tmp = getInt("    Bottles Sold    ", 0, 999);
+          int tmp = getInt("    Bottles Sold    ", 0, MAXINT);
           strcpy(line3, "<- Bottles in Cooler");
           switch(tmp){
             case -1:
@@ -663,6 +663,22 @@ void keyUpdate(unsigned long now){
         strcpy(line1, "   Dispensing...    ");
         btd++;
         screen = MAINMENU;
+        break;
+      }
+
+      case LEDBRGHT:{ // Set Brightness
+        int tmp = getInt(" Brightness of LEDs", 0, 100);
+        switch(tmp){
+          case -1:
+            break;
+          case -2:
+            screen = MAINMENU;
+            break;
+          default:
+            ledBrightness = tmp;
+            screen = MAINMENU;
+            break;
+        }
         break;
       }
     }
