@@ -1,5 +1,5 @@
 #include <Keypad.h>
-
+#include <EEPROM.h>
 #include <PWMServo.h>
 
 //-*-C++-*-
@@ -15,8 +15,8 @@
 #include "conf.h"
 #include "states.h"
 
-int bottles = 10;
-int bottleSold = 0;
+byte bottles = MAXBTLS;
+short bottleSold = 0;
 int coolerTemp = 0;
 
 int ledState;
@@ -75,14 +75,26 @@ void setup(){
   pinMode(SERVOPIN, OUTPUT);
   pinMode(LEDPIN, OUTPUT);
 
-  strcpy(line0, "      Aquabot       ");
-  strcpy(line1, "      Test1         ");
-  strcpy(line2, "      2Test         ");
-  strcpy(line3, "    ThreeTest       ");
+  EEPROM.get(BTLS_EEPROM_ADR, bottleSold);
 
-  delay(5000);
-  Serial1.print("?f");
+  Serial.print("Bottles: ");
+  Serial.println(bottleSold);
+
+  #ifdef SETUP_LCD
+  // Disable custom boot screen
+  Serial1.print("?S0");
+  // Set LCD size to 4x20 chars
+  Serial1.print("?G420");
+  // Set backlight to full brightness
+  Serial1.print("?BFF");
+  delay(100);
+  // Disable cursor
   Serial1.print("?c0");
+  delay(100);
+  #endif // SETUP_LCD
+
+  // Clear screen
+  Serial1.print("?f");
 
   Serial.println("Finnished setting up");
 }
@@ -300,6 +312,8 @@ void ledStripUpdate(unsigned long now){
     green2 *= ledBrightness/100.0;
     blue2 *= ledBrightness/100.0;
 
+    // Cannot PWM pin 27.
+
     if(RED1 != 27)
       analogWrite(RED1, red1);
     else
@@ -364,6 +378,7 @@ void moneyUpdate(unsigned long now){
     moneyState = READY;
     bottles--;
     bottleSold++;
+    EEPROM.put(BTLS_EEPROM_ADR, bottleSold);
     break;
   }
 }
@@ -485,7 +500,8 @@ void keyUpdate(unsigned long now){
         strcpy(line0, "      Aquabot       ");
         sprintf(line1, "%s: %i%c", "Bottles Left", bottles, ' ');
         sprintf(line2, "%s: %i%c", "Bottles Sold", bottleSold, ' ');
-        sprintf(line3, "%s: %i%s", "Cooler Temp", coolerTemp, "F   ");
+        //sprintf(line3, "%s: %i%s", "Cooler Temp", coolerTemp, "F   ");
+        strcpy(line3, "                    ");
 
         static int passIndex = 0;
         static char password[PASSLEN];
@@ -618,6 +634,7 @@ void keyUpdate(unsigned long now){
               break;
             default:
               bottleSold = tmp;
+              EEPROM.put(BTLS_EEPROM_ADR, bottleSold);
               screen = MAINMENU;
               break;
           }
@@ -673,6 +690,8 @@ void lcdUpdate(unsigned long now){
     Serial1.print("?x00");
     Serial1.print("?y3");
     Serial1.print(line3);
+
+    Serial1.flush();
 
     strcpy(oldLine0, line0);
     strcpy(oldLine1, line1);
@@ -734,6 +753,9 @@ void lcdUpdate(unsigned long now){
         oldLine3[i] = line3[i];
       }
     }
+
+    Serial1.flush();
+
     lcdMillis = now;
   }
 

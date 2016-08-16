@@ -12,11 +12,13 @@
 #define SERVODELAY 1UL
 #define SERVOSTOP 700UL
 #define SERVOSTEP 1
-#define SERVOMIN 45
+#define SERVOMIN 25
 #define SERVOMAX 135
 #define MAXBTLS 10
+#define BTLS_EEPROM_ADR 0
 
 // LCD
+//#define SETUP_LCD
 #define LCDDELAY 100UL
 #define DRAWDELAY 1000UL
 #define LCDWIDTH 20
