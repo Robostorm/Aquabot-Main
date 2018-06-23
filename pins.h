@@ -14,13 +14,13 @@
 #define SERVOPIN 26
 #define LEDPIN 6
 
-#define RED1 0
-#define GREEN1 27
-#define BLUE1 1
+#define RED1 25
+#define GREEN1 1
+#define BLUE1 0
 
-#define RED2 15
-#define GREEN2 14
-#define BLUE2 16
+#define RED2 14
+#define GREEN2 16
+#define BLUE2 15
 
 #define COOLTEMP A0
 
