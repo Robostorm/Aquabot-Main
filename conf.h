@@ -49,4 +49,8 @@
 #define RAINBOWSPEED 1
 #define FADESPEED 2
 
+// Buttons
+#define BUTTONSDELAY 10UL
+#define LONGBUTTONDELAY 5000UL
+
 #endif /* !CONF */

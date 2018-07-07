@@ -71,6 +71,9 @@ void setup(){
 
   pinMode(IRPIN, INPUT);
   pinMode(PHOTOPIN, INPUT);
+  pinMode(BUTTON1, INPUT);
+  pinMode(BUTTON2, INPUT);
+  pinMode(POT1, INPUT);
   pinMode(BILLPIN, OUTPUT);
   pinMode(SERVOPIN, OUTPUT);
   pinMode(LEDPIN, OUTPUT);
@@ -111,6 +114,53 @@ void loop(){
   keyUpdate(now);
   lcdUpdate(now);
   oldNow = now;
+}
+
+int buttonUpdate(unsigned long now){
+    static unsigned long buttonMillis = 0UL;
+
+    static int last_button1_state = LOW;
+    static int last_button2_state = LOW;
+
+    static unsigned long last_button1_millis;
+    static unsigned long last_button2_millis;
+
+    static int button1_long_pressed = false;
+    static int button2_long_pressed = false;
+
+    if(now - buttonMillis >= BUTTONDELAY) {
+        int button1 = digitalRead(BUTTON1);
+
+        if(button1 == HIGH && last_button1_state == LOW) {
+            last_button1_millis = now;
+            button1_long_pressed = false;
+            bottles = MAXBTLS;
+        }
+
+        if(button1 == HIGH && now - last_button1_millis >= LONGBUTTONDELAY && button1_long_pressed == false) {
+            button1_long_pressed = true;
+            bottleSold = 0;
+        }
+
+        last_button1_state = button1;
+
+        int button2 = digitalRead(BUTTON2);
+
+        if(button2 == HIGH && last_button2_state == LOW) {
+            last_button2_millis = now;
+            button2_long_pressed = false;
+        }
+
+        if(button2 == HIGH && now - last_button2_millis >= LONGBUTTONDELAY && button2_long_pressed == false) {
+            button2_long_pressed = true;
+            btd++;
+        }
+
+        last_button2_state = button2;
+
+        buttonMillis = now;
+    }
+
 }
 
 int ledUpdate(unsigned long now){

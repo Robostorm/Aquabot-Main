@@ -26,4 +26,8 @@
 
 #define TONEPIN 25
 
+#define BUTTON1 A1
+#define BUTTON2 A2
+#define POT1 A3
+
 #endif /* !PINS */
