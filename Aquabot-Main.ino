@@ -178,6 +178,9 @@ int buttonUpdate(unsigned long now){
 
         last_button2_state = button2;
 
+        int pot = analogRead(POT1);
+        ledBrightness = pot * 100.0/1023.0;
+
         buttonMillis = now;
     }
 
