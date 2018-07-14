@@ -71,8 +71,8 @@ void setup(){
 
   pinMode(IRPIN, INPUT);
   pinMode(PHOTOPIN, INPUT);
-  pinMode(BUTTON1, INPUT);
-  pinMode(BUTTON2, INPUT);
+  pinMode(BUTTON1, INPUT_PULLUP);
+  pinMode(BUTTON2, INPUT_PULLUP);
   pinMode(POT1, INPUT);
   pinMode(BILLPIN, OUTPUT);
   pinMode(SERVOPIN, OUTPUT);
