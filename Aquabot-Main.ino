@@ -109,6 +109,7 @@ void loop(){
   static unsigned long oldNow = 0;
   unsigned long now = millis();
   bluetoothUpdate(now);
+  buttonUpdate(now);
   sensorUpdate(now);
   motorUpdate(now);
   ledUpdate(now);
@@ -139,8 +140,8 @@ int bluetoothUpdate(unsigned long now){
 int buttonUpdate(unsigned long now){
     static unsigned long buttonMillis = 0UL;
 
-    static int last_button1_state = LOW;
-    static int last_button2_state = LOW;
+    static int last_button1_state = HIGH;
+    static int last_button2_state = HIGH;
 
     static unsigned long last_button1_millis;
     static unsigned long last_button2_millis;
@@ -151,32 +152,54 @@ int buttonUpdate(unsigned long now){
     if(now - buttonMillis >= BUTTONDELAY) {
         int button1 = digitalRead(BUTTON1);
 
-        if(button1 == HIGH && last_button1_state == LOW) {
+        // start the timer when the button is depressed
+        if(button1 == LOW && last_button1_state == HIGH) {
             last_button1_millis = now;
             button1_long_pressed = false;
-            bottles = MAXBTLS;
         }
 
-        if(button1 == HIGH && now - last_button1_millis >= LONGBUTTONDELAY && button1_long_pressed == false) {
-            button1_long_pressed = true;
-            bottleSold = 0;
+        // check if the button has been held long enough for a long press
+        if(button1 == LOW && now - last_button1_millis >= LONGBUTTONDELAY) {
+            if(button1_long_pressed == false) {
+                button1_long_pressed = true;
+                bottleSold = 0;
+            }
+        }
+
+        // check if the button was released before a long press
+        // this is a short press
+        if(button1 == HIGH && last_button1_state == LOW && button1_long_pressed == false) {
+            bottles = MAXBTLS;
         }
 
         last_button1_state = button1;
 
         int button2 = digitalRead(BUTTON2);
 
-        if(button2 == HIGH && last_button2_state == LOW) {
+        // start the timer when the button is depressed
+        if(button2 == LOW && last_button2_state == HIGH) {
             last_button2_millis = now;
             button2_long_pressed = false;
         }
 
-        if(button2 == HIGH && now - last_button2_millis >= LONGBUTTONDELAY && button2_long_pressed == false) {
-            button2_long_pressed = true;
-            btd++;
+        // check if the button has been held long enough for a long press
+        if(button2 == LOW && now - last_button2_millis >= SHORTBUTTONDELAY) {
+            if(button2_long_pressed == false) {
+                button2_long_pressed = true;
+                btd++;
+            }
+        }
+
+        // check if the button was released before a long press
+        // this is a short press
+        if(button2 == HIGH && last_button2_state == LOW && button2_long_pressed == false) {
+            // do nothing right now
         }
 
         last_button2_state = button2;
+
+        //int pot = analogRead(POT1);
+        //ledBrightness = pot * 100.0/1023.0;
 
         buttonMillis = now;
     }

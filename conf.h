@@ -53,7 +53,8 @@
 #define FADESPEED 2
 
 // Buttons
-#define BUTTONSDELAY 10UL
+#define BUTTONDELAY 10UL
 #define LONGBUTTONDELAY 5000UL
+#define SHORTBUTTONDELAY 2000UL
 
 #endif /* !CONF */
