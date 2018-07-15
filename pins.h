@@ -3,6 +3,9 @@
 #ifndef PINS
 #define PINS
 
+#define BLUETOOTHRX 42
+#define BLUETOOTHTX 43
+
 #define READY 0
 #define GETTING 1
 #define DISPENSING 2

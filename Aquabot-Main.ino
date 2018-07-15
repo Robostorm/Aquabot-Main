@@ -19,6 +19,8 @@ byte bottles = MAXBTLS;
 short bottleSold = 0;
 int coolerTemp = 0;
 
+SoftwareSerial bluetoothSerial(BLUETOOTHRX, BLUETOOTHTX);
+
 int ledState;
 int irState;
 int photoState;
@@ -65,6 +67,7 @@ char key = NOKEY;
 void setup(){
   Serial.begin(9600);
   Serial1.begin(9600);
+  bluetoothSerial.begin(9600);
   Serial.println("Setting up");
 
   servo.attach(SERVOPIN);
@@ -105,6 +108,7 @@ void setup(){
 void loop(){
   static unsigned long oldNow = 0;
   unsigned long now = millis();
+  bluetoothUpdate(now);
   sensorUpdate(now);
   motorUpdate(now);
   ledUpdate(now);
@@ -114,6 +118,22 @@ void loop(){
   keyUpdate(now);
   lcdUpdate(now);
   oldNow = now;
+}
+
+int bluetoothUpdate(unsigned long now){
+    static unsigned long bluetoothMillis = 0UL;
+
+    static int state = 0;
+    if(now - bluetoothMillis >= BLUETOOTHDELAY) {
+      if(Serial.available() > 0) {
+        state = bluetoothSerial.read();
+        state = bluetoothSerial.read()<<8;
+        state = bluetoothSerial.read()<<16;
+        state = bluetoothSerial.read()<<24;
+      }
+      Serial.println(state, DEC);
+      bluetoothMillis = now;
+    }
 }
 
 int buttonUpdate(unsigned long now){

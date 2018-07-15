@@ -3,6 +3,9 @@
 #ifndef CONF
 #define CONF
 
+//Bluetooth App
+#define BLUETOOTHDELAY 5UL
+
 // Status LED
 #define LEDDELAY 1000UL
 
