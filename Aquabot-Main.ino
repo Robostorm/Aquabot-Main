@@ -405,35 +405,35 @@ void ledStripUpdate(unsigned long now){
     green2 *= ledBrightness/100.0;
     blue2 *= ledBrightness/100.0;
 
-    // Cannot PWM pin 27.
+    // Cannot PWM pin 27, 26, or 25 due to the PWMServo library using timers.
 
-    if(RED1 != 27)
+    if(RED1 != 27 && RED1 != 26 && RED1 != 25)
       analogWrite(RED1, red1);
     else
       digitalWrite(RED1, (red1 <= 0 ? LOW : HIGH));
 
-    if(GREEN1 != 27)
+    if(GREEN1 != 27 && GREEN1 != 26 && GREEN1 != 25)
       analogWrite(GREEN1, green1);
     else
       digitalWrite(GREEN1, (green1 <= 0 ? LOW : HIGH));
 
-    if(BLUE1 != 27)
+    if(BLUE1 != 27 && BLUE1 != 26 && BLUE1 != 25)
       analogWrite(BLUE1, blue1);
     else
       digitalWrite(BLUE1, (blue1 <= 0 ? LOW : HIGH));
 
 
-    if(RED2 != 27)
+    if(RED2 != 27 && RED1 != 26 && RED1 != 25)
       analogWrite(RED2, red2);
     else
       digitalWrite(RED2, (red2 <= 0 ? LOW : HIGH));
 
-    if(GREEN2 != 27)
+    if(GREEN2 != 27 && GREEN1 != 26 && GREEN1 != 25)
       analogWrite(GREEN2, green2);
     else
       digitalWrite(GREEN2, (green2 <= 0 ? LOW : HIGH));
 
-    if(BLUE2 != 27)
+    if(BLUE2 != 27 && BLUE1 != 26 && BLUE1 != 25)
       analogWrite(BLUE2, blue2);
     else
       digitalWrite(BLUE2, (blue2 <= 0 ? LOW : HIGH));
