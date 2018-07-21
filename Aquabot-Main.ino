@@ -126,13 +126,16 @@ int bluetoothUpdate(unsigned long now){
 
     static int state = 0;
     if(now - bluetoothMillis >= BLUETOOTHDELAY) {
-      if(Serial.available() > 0) {
+      if(Serial.available() >= 4) {
         state = bluetoothSerial.read();
         state = bluetoothSerial.read()<<8;
         state = bluetoothSerial.read()<<16;
         state = bluetoothSerial.read()<<24;
       }
-      Serial.println(state, DEC);
+      if(state >= 0&& state <= 255){
+        analogWrite(RED1, state);
+        analogWrite(RED2, state)
+      }
       bluetoothMillis = now;
     }
 }
