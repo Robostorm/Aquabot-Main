@@ -115,7 +115,7 @@ void loop(){
   ledUpdate(now);
   moneyUpdate(now);
   dispenserUpdate(now);
-  ledStripUpdate(now);
+  //ledStripUpdate(now);
   keyUpdate(now);
   lcdUpdate(now);
   oldNow = now;
@@ -134,7 +134,18 @@ int bluetoothUpdate(unsigned long now){
       }
       if(state >= 0&& state <= 255){
         analogWrite(RED1, state);
-        analogWrite(RED2, state)
+        analogWrite(RED2, state);
+      }
+      if(state >= 256&& state <= 511){
+        analogWrite(BLUE1, state-256);
+        analogWrite(BLUE2, state-256);
+      }
+      if(state >= 512&& state <= 767){
+        analogWrite(GREEN1, state-512);
+        analogWrite(GREEN2, state-512);
+      }
+      if(state = 768){
+        btd += 1
       }
       bluetoothMillis = now;
     }
