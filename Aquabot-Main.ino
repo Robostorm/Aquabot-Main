@@ -1,6 +1,7 @@
 #include <Keypad.h>
 #include <EEPROM.h>
 #include <PWMServo.h>
+#include <SoftwareSerial.h>
 
 //-*-C++-*-
 //https://github.com/Robostorm/Aquabot-Bill-Feed-Dispencer/tree/2015
@@ -14,6 +15,8 @@
 #include "pins.h"
 #include "conf.h"
 #include "states.h"
+
+#define DEBUGLEDS
 
 byte bottles = MAXBTLS;
 short bottleSold = 0;
@@ -426,17 +429,17 @@ void ledStripUpdate(unsigned long now){
       digitalWrite(BLUE1, (blue1 <= 0 ? LOW : HIGH));
 
 
-    if(RED2 != 27 && RED1 != 26 && RED1 != 25)
+    if(RED2 != 27 && RED2 != 26 && RED2 != 25)
       analogWrite(RED2, red2);
     else
       digitalWrite(RED2, (red2 <= 0 ? LOW : HIGH));
 
-    if(GREEN2 != 27 && GREEN1 != 26 && GREEN1 != 25)
+    if(GREEN2 != 27 && GREEN2 != 26 && GREEN2 != 25)
       analogWrite(GREEN2, green2);
     else
       digitalWrite(GREEN2, (green2 <= 0 ? LOW : HIGH));
 
-    if(BLUE2 != 27 && BLUE1 != 26 && BLUE1 != 25)
+    if(BLUE2 != 27 && BLUE2 != 26 && BLUE2 != 25)
       analogWrite(BLUE2, blue2);
     else
       digitalWrite(BLUE2, (blue2 <= 0 ? LOW : HIGH));
