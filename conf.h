@@ -51,6 +51,7 @@
 #define BLNKDELAY 150UL
 #define RAINBOWSPEED 1
 #define FADESPEED 2
+#define DONEFLASH 7000UL
 
 // Buttons
 #define BUTTONDELAY 10UL

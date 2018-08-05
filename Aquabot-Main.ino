@@ -111,14 +111,14 @@ void setup(){
 void loop(){
   static unsigned long oldNow = 0;
   unsigned long now = millis();
-  bluetoothUpdate(now);
+  //bluetoothUpdate(now);
   buttonUpdate(now);
   sensorUpdate(now);
   motorUpdate(now);
   ledUpdate(now);
   moneyUpdate(now);
   dispenserUpdate(now);
-  //ledStripUpdate(now);
+  ledStripUpdate(now);
   keyUpdate(now);
   lcdUpdate(now);
   oldNow = now;
@@ -127,29 +127,33 @@ void loop(){
 int bluetoothUpdate(unsigned long now){
     static unsigned long bluetoothMillis = 0UL;
 
-    static int state = 0;
     if(now - bluetoothMillis >= BLUETOOTHDELAY) {
-      if(Serial.available() >= 4) {
+      
+      int state = 0;
+      Serial.println(bluetoothSerial.available(), DEC);
+      if(bluetoothSerial.available() >= 4) {
         state = bluetoothSerial.read();
         state = bluetoothSerial.read()<<8;
         state = bluetoothSerial.read()<<16;
         state = bluetoothSerial.read()<<24;
+        Serial.println(state, DEC);
+        if(state >= 0&& state <= 255){
+          analogWrite(RED1, state);
+          analogWrite(RED2, state);
+        }
+        if(state >= 256&& state <= 511){
+          analogWrite(BLUE1, state-256);
+          analogWrite(BLUE2, state-256);
+        }
+        if(state >= 512&& state <= 767){
+          analogWrite(GREEN1, state-512);
+          analogWrite(GREEN2, state-512);
+        }
+        if(state = 768){
+          //btd += 1;
+        }
       }
-      if(state >= 0&& state <= 255){
-        analogWrite(RED1, state);
-        analogWrite(RED2, state);
-      }
-      if(state >= 256&& state <= 511){
-        analogWrite(BLUE1, state-256);
-        analogWrite(BLUE2, state-256);
-      }
-      if(state >= 512&& state <= 767){
-        analogWrite(GREEN1, state-512);
-        analogWrite(GREEN2, state-512);
-      }
-      if(state = 768){
-        btd += 1
-      }
+
       bluetoothMillis = now;
     }
 }
@@ -240,6 +244,13 @@ int ledUpdate(unsigned long now){
   return ledState;
 }
 
+/*
+          |   Idle   |  Getting |  Dispensing |  Done    | No Bottles
+   -------|----------|----------|-------------|----------|------------
+    Main  | Fade RGB | Flash BG |   Flash BG  |  Blue    |    Red
+    Front | Fade BG  |   Blue   |   Flash BG  | Flash BG |    Red
+*/
+
 void ledStripUpdate(unsigned long now){
   static unsigned long stripMillis = 0UL;
   if(now - stripMillis >= LEDSDELAY){
@@ -248,11 +259,14 @@ void ledStripUpdate(unsigned long now){
     static int rainbowState = 1;
     static int fadeState = 0;
     static unsigned long billMillis = 0;
+    static unsigned long doneMillis = 0;
 
+    // Main LEDs
     double red2 = 0;
     double green2 = 0;
     double blue2 = 0;
 
+    // Front LEDs
     double red1 = 0;
     double green1 = 0;
     double blue1 = 0;
@@ -265,130 +279,181 @@ void ledStripUpdate(unsigned long now){
     static double oldGreen2 = 0;
     static double oldBlue2 = 0;
 
-    if(moneyState == DISPDISPENSING){
-      green1 = 255;
-      switch(flashState){
-        case 0:
-          green2 = 255;
-          blue2 = 0;
-          red2 = 0;
-          if(now-billMillis >= BLNKDELAY){
-            billMillis = now;
-            flashState = 1;
-          }
-          break;
-        case 1:
-          green2 = 0;
-          blue2 = 255;
-          red2 = 0;
-          if(now-billMillis >= BLNKDELAY){
-            billMillis = now;
-            flashState = 0;
-          }
-          break;
-      }
-    }else if(moneyState == DISPGETTING){
-      red1 = 255;
-      switch(flashState){
-        case 0:
-          red2 = 0;
-          green2 = 255;
-          blue2 = 0;
-          if(now-billMillis >= BLNKDELAY){
-            billMillis = now;
-            flashState = 1;
-          }
-          break;
-        case 1:
-          green2 = 0;
-          blue2 = 255;
-          red2 = 0;
-          if(now-billMillis >= BLNKDELAY){
-            billMillis = now;
-            flashState = 0;
-          }
-          break;
-      }
-    }else{
-      switch(rainbowState){
-        case 1:
-          red2 = 255;
-          green2 = oldGreen2+RAINBOWSPEED;
-          blue2 = 0;
-          if(green2 >= 255){
-            green2 = 255;
-            rainbowState = 2;
-          }
-          break;
-        case 2:
-          red2 = oldRed2-RAINBOWSPEED;
-          green2 = 255;
-          blue2 = 0;
-          if(red2 <= 0){
+    switch (moneyState) {
+      case DISPGETTING:
+        // Flash main blue/green
+        // Front blue
+        red1 = 0;
+        green1 = 0;
+        blue1 = 255;
+        switch(flashState){
+          case 0:
             red2 = 0;
-            rainbowState = 3;
-          }
-          break;
-        case 3:
-          red2 = 0;
-          green2 = 255;
-          blue2 = oldBlue2+RAINBOWSPEED;
-          if(blue2 >= 255){
-            blue2 = 255;
-            rainbowState = 4;
-          }
-          break;
-        case 4:
-          red2 = 0;
-          green2 = oldGreen2-RAINBOWSPEED;
-          blue2 = 255;
-          if(green2 <= 0){
+            green2 = 255;
+            blue2 = 0;
+            if(now-billMillis >= BLNKDELAY){
+              billMillis = now;
+              flashState = 1;
+            }
+            break;
+          case 1:
+            red2 = 0;
             green2 = 0;
-            rainbowState = 5;
-          }
-          break;
-        case 5:
-          red2 = oldRed2+RAINBOWSPEED;
+            blue2 = 255;
+            if(now-billMillis >= BLNKDELAY){
+              billMillis = now;
+              flashState = 0;
+            }
+            break;
+        }
+        break;
+      case DISPDISPENSING:
+        // Flash both LEDs blue/green
+        switch(flashState){
+          case 0:
+            red2 = 0;
+            green2 = 255;
+            blue2 = 0;
+            red1 = 0;
+            green1 = 255;
+            blue1 = 0;
+            if(now-billMillis >= BLNKDELAY){
+              billMillis = now;
+              flashState = 1;
+            }
+            break;
+          case 1:
+            red2 = 0;
+            green2 = 0;
+            blue2 = 255;
+            red1 = 0;
+            green1 = 0;
+            blue1 = 255;
+            if(now-billMillis >= BLNKDELAY){
+              billMillis = now;
+              flashState = 0;
+            }
+            break;
+        }
+        doneMillis = now;
+        break;
+      default:
+        if (now - doneMillis < DONEFLASH) {
+          // Flash front blue/green
+          // Main blue
+          red2 = 0;
           green2 = 0;
           blue2 = 255;
-          if(red2 >= 255){
-            red2 = 255;
-            rainbowState = 6;
+          switch(flashState){
+            case 0:
+              red1 = 0;
+              green1 = 255;
+              blue1 = 0;
+              if(now-billMillis >= BLNKDELAY){
+                billMillis = now;
+                flashState = 1;
+              }
+              break;
+            case 1:
+              red1 = 0;
+              green1 = 0;
+              blue1 = 255;
+              if(now-billMillis >= BLNKDELAY){
+                billMillis = now;
+                flashState = 0;
+              }
+              break;
           }
-          break;
-        case 6:
+        } else if (bottles <= 0) {
+          // All red
           red2 = 255;
           green2 = 0;
-          blue2 = oldBlue2-RAINBOWSPEED;
-          if(blue2 <= 0){
-            blue2 = 0;
-            rainbowState = 1;
+          blue2 = 0;
+          red1 = 255;
+          green1 = 0;
+          blue1 = 0;
+        } else {
+          // RAINBOWS!!!
+          switch(rainbowState){
+            case 1:
+              red2 = 255;
+              green2 = oldGreen2+RAINBOWSPEED;
+              blue2 = 0;
+              if(green2 >= 255){
+                green2 = 255;
+                rainbowState = 2;
+              }
+              break;
+            case 2:
+              red2 = oldRed2-RAINBOWSPEED;
+              green2 = 255;
+              blue2 = 0;
+              if(red2 <= 0){
+                red2 = 0;
+                rainbowState = 3;
+              }
+              break;
+            case 3:
+              red2 = 0;
+              green2 = 255;
+              blue2 = oldBlue2+RAINBOWSPEED;
+              if(blue2 >= 255){
+                blue2 = 255;
+                rainbowState = 4;
+              }
+              break;
+            case 4:
+              red2 = 0;
+              green2 = oldGreen2-RAINBOWSPEED;
+              blue2 = 255;
+              if(green2 <= 0){
+                green2 = 0;
+                rainbowState = 5;
+              }
+              break;
+            case 5:
+              red2 = oldRed2+RAINBOWSPEED;
+              green2 = 0;
+              blue2 = 255;
+              if(red2 >= 255){
+                red2 = 255;
+                rainbowState = 6;
+              }
+              break;
+            case 6:
+              red2 = 255;
+              green2 = 0;
+              blue2 = oldBlue2-RAINBOWSPEED;
+              if(blue2 <= 0){
+                blue2 = 0;
+                rainbowState = 1;
+              }
+              break;
           }
-          break;
-      }
 
-      switch(fadeState){
-        case 0:
-          red1 = oldRed1+FADESPEED;
-          blue1 = oldBlue1-FADESPEED;
-          if(red1 >= 255 || blue1 <= 0){
-            red1 = 255;
-            blue1 = 0;
-            fadeState = 1;
+          switch(fadeState){
+            case 0:
+              green1 = oldGreen1+FADESPEED;
+              blue1 = oldBlue1-FADESPEED;
+              if(green1 >= 255 || blue1 <= 0){
+                green1 = 255;
+                blue1 = 0;
+                fadeState = 1;
+              }
+              break;
+            case 1:
+            green1 = oldGreen1-FADESPEED;
+            blue1 = oldBlue1+FADESPEED;
+            if(green1 <= 0 || blue1 >= 255){
+              green1 = 0;
+              blue1 = 255;
+              fadeState = 0;
+            }
+              break;
           }
-          break;
-        case 1:
-        red1 = oldRed1-FADESPEED;
-        blue1 = oldBlue1+FADESPEED;
-        if(red1 <= 0 || blue1 >= 255){
-          red1 = 0;
-          blue1 = 255;
-          fadeState = 0;
-        }
-          break;
       }
-
     }
+
     oldRed1 = red1;
     oldGreen1 = green1;
     oldBlue1 = blue1;

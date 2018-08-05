@@ -21,9 +21,9 @@
 #define GREEN1 1
 #define BLUE1 0
 
-#define RED2 14
+#define RED2 15
 #define GREEN2 16
-#define BLUE2 15
+#define BLUE2 14
 
 #define COOLTEMP A0
 
